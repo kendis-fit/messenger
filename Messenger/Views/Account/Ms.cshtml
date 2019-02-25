@@ -43,13 +43,6 @@
 				<input type="text" placeholder="search" id="SearchInput" />
 			</div>
 			<ul id="Friends">
-				<li class="Friend">
-					<img class="FriendAvatar" src="" />
-					<div class="FriendInfo">
-						<span class="Name">Name</span></br>
-						<span class="LastMessage">Some message</span>
-					</div>
-				</li>
 			</ul>
 		</div>
 		<div id="MessagesAndInputs">
@@ -57,13 +50,6 @@
 				<li id="NotSelectedFriend">
 					<span>Select a friend</span>
 				</li>
-				<!--<li class="Message">
-					<img class="FriendAvatarMessage" src="" />
-					<div class="MessageInfo">
-						<div class="NameUserMessage">Name</div>
-						<div class="AnyMessage">Some message fdsf fdsfasdf</div>
-					</div>
-					</li>-->
 			</ul>
 			<div id="InputMessage">
 				<textarea placeholder="write a message" id="MessageByUser"></textarea></br>
@@ -77,6 +63,7 @@
 	<script src="~/Scripts/ms.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function () {
+			var loginFriend = null;
 			var key = localStorage.getItem("key1");
 			var api = ApiRequest(key);
 			var page = DynamicPage();
@@ -99,16 +86,16 @@
 				localStorage.removeItem("key1");
 				window.location.href = "/Visit/Login";
 			});
-			$(".Friend").click(function () {
-				$("#NotSelectedFriend").css("display", "none");
-				$("#InputMessage").css("display", "block");
+			$("#Friends").on("click", ".Friend", function (event) {
+				loginFriend = $(this).data("login");
+				page.SelectFriend();
 				// post-ajax request to server to get a chat
 			});
 			$("#SendMessage").click(function () {
-				// add message in client part
-				// 1) Append Message in ul#Messages
-				// 2) Update Last Message in span.LastMessage
-
+				var message = $("#MessageByUser").val();
+				$("#MessageByUser").val("");
+				page.AppendMessage("Noname", message);
+				page.UpdateMessage(loginFriend, message);
 				// add message in server part
 				// 1) post-ajax request to server 
 				// 2) parse message

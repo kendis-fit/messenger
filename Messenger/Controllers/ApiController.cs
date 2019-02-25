@@ -77,7 +77,8 @@ namespace Messenger.Controllers
 			var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0).FirstOrDefault();
 			if (user != null)
 			{
-				var users = db.Users.Where(usr => usr.Login.Contains(search))
+				var users = db.Users.Where(usr => usr.Login.Contains(search) &&
+					string.Compare(user.Login, usr.Login) != 0) 
 					.Select(usr => new
 					{
 						usr.Login,
