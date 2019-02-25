@@ -1,0 +1,56 @@
+﻿@{
+	ViewBag.Title = "Limonne";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<form method="post" action="~/Visit/Login" id="Form-Post">
+	@Html.ValidationSummary()
+	<table>
+		<tr>
+			<td><label>Login</label></td>
+			<td><input type="text" name="Login" id="Login" required /></td>
+		</tr>
+		<tr>
+			<td><label>Password</label></td>
+			<td><input type="password" name="Password" id="Password" required /></td>
+		</tr>
+		<tr>
+			<td><button type="button" id="Sign-Up">Sign up</button></td>
+			<td><button type="button" id="Sign-In">Sign in</button></td>
+		</tr>
+	</table>
+</form>
+
+@section Scripts {
+	<script type="text/javascript" src="~/Scripts/sha-256 compressed.js"></script>
+	<script type="text/javascript" src="~/Scripts/login.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			var key = localStorage.getItem("key1");
+			var request = Request();
+			if (key != null) {
+				request.CheckKey(key, function (check) {
+					if (check)
+						window.location.href = "/Account/Ms";
+					else
+						localStorage.removeItem("key1");
+				});	
+			}
+			$("#Sign-Up").click(function () {
+				window.location.href = "/Visit/Registration";
+			});
+			$("#Sign-In").click(function () {
+				var login = $("#Login").val();
+				var password = $("#Password").val();
+				var user = new User(login, password);
+				user.Password = user.EncryptPassword(sha256);
+				request.SetKey(user, function (key) {
+					if (key != null)
+						localStorage.setItem("key1", key);
+					$("#Form-Post").submit();
+				});
+			});
+		});
+	</script>
+}
+

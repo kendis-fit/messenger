@@ -1,0 +1,124 @@
+﻿@{
+	ViewBag.Title = "Ms";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section MetaReferences {
+	<link rel="stylesheet" type="text/css" href="~/Content/Ms.css" />
+	<script type="text/javascript">
+		var key = localStorage.getItem("key1");
+		if (key == null)
+			window.location.href = "/Visit/Login";
+	</script>
+}
+
+<header id="Page">
+	<div id="Panel">
+		<div id="Drop-DownList">
+			<img id="ImgDrop-DownList" />
+			<ul id="" style="display: none">
+				<li id="Profile">
+					<img id="ImgProfile" />
+					<span>Profile</span>
+				</li>
+				<li id="Settings">
+					<img id="ImgSettings" />
+					<span>Settings</span>
+				</li>
+				<li id="About">
+					<img id="ImgAbout" />
+					<span>About</span>
+				</li>
+			</ul>
+		</div>
+		<div id="Limonne">
+			<a href="/Account/Ms">Limonne</a>
+		</div>
+		<button type="button" id="Exit">Exit</button>
+	</div>
+	<div id="Main">
+		<div id="SearchAndFriends">
+			<div id="Search">
+				<img id="SearchIcon" src="~/Images/search.png" />
+				<input type="text" placeholder="search" id="SearchInput" />
+			</div>
+			<ul id="Friends">
+				<li class="Friend">
+					<img class="FriendAvatar" src="" />
+					<div class="FriendInfo">
+						<span class="Name">Name</span></br>
+						<span class="LastMessage">Some message</span>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div id="MessagesAndInputs">
+			<ul id="Messages">
+				<li id="NotSelectedFriend">
+					<span>Select a friend</span>
+				</li>
+				<!--<li class="Message">
+					<img class="FriendAvatarMessage" src="" />
+					<div class="MessageInfo">
+						<div class="NameUserMessage">Name</div>
+						<div class="AnyMessage">Some message fdsf fdsfasdf</div>
+					</div>
+					</li>-->
+			</ul>
+			<div id="InputMessage">
+				<textarea placeholder="write a message" id="MessageByUser"></textarea></br>
+				<button type="button" id="SendMessage"><span>Send</span></button>
+			</div>
+		</div>
+	</div>
+</header>
+
+@section Scripts {
+	<script src="~/Scripts/ms.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			var key = localStorage.getItem("key1");
+			var api = ApiRequest(key);
+			var page = DynamicPage();
+			var friends = null;
+			api.ShowFriends(function (users) {
+				page.AddFriends(users);
+				friends = users;
+			});
+			$("#SearchInput").keyup(function (event) {
+				var search = $("#SearchInput").val();
+				if (search != null && ((event.keyCode >= 97 && event.keyCode <= 122) ||
+					(event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 48 && event.keyCode <= 57) ||
+					event.keyCode == 95)) {
+					api.SearchFriends(page.AddFriends, search);
+				}
+				else if (search == null || search.length == 0)
+					page.AddFriends(friends);
+			});
+			$("#Exit").click(function () {
+				localStorage.removeItem("key1");
+				window.location.href = "/Visit/Login";
+			});
+			$(".Friend").click(function () {
+				$("#NotSelectedFriend").css("display", "none");
+				$("#InputMessage").css("display", "block");
+				// post-ajax request to server to get a chat
+			});
+			$("#SendMessage").click(function () {
+				// add message in client part
+				// 1) Append Message in ul#Messages
+				// 2) Update Last Message in span.LastMessage
+
+				// add message in server part
+				// 1) post-ajax request to server 
+				// 2) parse message
+				// 3) find a chat
+				// ...
+			});
+			// future functional:
+			// in real time show to client online his friend
+			// in real time get with client a messages from friends
+		});
+	</script>
+}
+
