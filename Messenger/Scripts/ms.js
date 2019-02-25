@@ -46,7 +46,7 @@ var DynamicPage = function () {
 				makeInfoFriend += "<img class='FriendAvatar' src='' />";
 				makeInfoFriend += "<div class='FriendInfo'>";
 				makeInfoFriend += "<span class='Name'>" + friend.FirstName + " " + (friend.LastName != undefined ? friend.LastName : "") + "</span></br>";
-				makeInfoFriend += "<span class='LastMessage'>" + (friend.Message != undefined ? friend.Message : "") + "</span>";
+				makeInfoFriend += "<span class='LastMessage'>" + (friend.LastMessage != undefined ? friend.LastMessage : "") + "</span>";
 				makeInfoFriend += "</div>";
 				makeInfoFriend += "</li>";
 			});

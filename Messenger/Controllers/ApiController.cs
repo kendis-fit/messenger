@@ -48,8 +48,21 @@ namespace Messenger.Controllers
 								.Select(user => user.Id).FirstOrDefault();
 			if (idUser != null)
 			{
-				var idFriends = db.Friends.Where(friend => friend.UserId == idUser).Select(friend => friend.FriendId);
-				var friends = db.Users.Where(friend => idFriends.Contains(friend.Id));
+				var idFriends = db.Friends.Where(friend => friend.UserId == idUser)
+					.Select(friend => friend.FriendId);
+				var friends = db.Users.Join(db.Friends,
+					user => user.Id,
+					friend => friend.UserId,
+					(user, friend) => new { user, friend })
+					.Where(result => idFriends.Contains(result.user.Id))
+					.Select(result => new
+					{
+						result.user.Login,
+						result.user.FirstName,
+						result.user.LastName,
+						result.friend.LastMessage
+					});
+
 				return Json(friends);
 			}
 			return null;
@@ -64,7 +77,13 @@ namespace Messenger.Controllers
 			var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0).FirstOrDefault();
 			if (user != null)
 			{
-				var users = db.Users.Where(usr => usr.Login.Contains(search));
+				var users = db.Users.Where(usr => usr.Login.Contains(search))
+					.Select(usr => new
+					{
+						usr.Login,
+						usr.FirstName,
+						usr.LastName
+					});
 				return Json(users);
 			}
 			return null;
