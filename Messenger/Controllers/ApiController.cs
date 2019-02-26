@@ -28,6 +28,49 @@ namespace Messenger.Controllers
 		}
 
 		[HttpPost]
+		public JsonResult Info()
+		{
+			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
+			var key = (string)data.key;
+			var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
+				.Select(usr => new
+				{
+					usr.Login,
+					usr.FirstName,
+					usr.LastName,
+					usr.Email
+				}).FirstOrDefault();
+			if (user != null)
+				return Json(user);
+			return null;
+		}
+
+		[HttpPost]
+		public JsonResult InfoFriend()
+		{
+			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
+			var key = (string)data.key;
+			var login = (string)data.login;
+			int? userExist = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
+				.Select(usr => usr.Id).FirstOrDefault();
+			if (userExist != null)
+			{
+				var friend = db.Users.Where(usr => string.Compare(usr.Login, login) == 0)
+					.Select(usr => new
+					{
+						usr.Login,
+						usr.FirstName,
+						usr.LastName,
+						usr.LastSeen,
+						usr.Online
+					}).FirstOrDefault();
+				if (friend != null)
+					return Json(friend);
+			}
+			return null;
+		}
+
+		[HttpPost]
 		public JsonResult CheckKey()
 		{
 			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);

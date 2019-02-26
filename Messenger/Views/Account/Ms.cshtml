@@ -52,7 +52,7 @@
 				</li>
 			</ul>
 			<div id="InputMessage">
-				<textarea placeholder="write a message" id="MessageByUser"></textarea></br>
+				<textarea placeholder="write a message" id="MessageByUser"></textarea><br>
 				<button type="button" id="SendMessage"><span>Send</span></button>
 			</div>
 		</div>
@@ -63,39 +63,48 @@
 	<script src="~/Scripts/ms.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function () {
-			var loginFriend = null;
 			var key = localStorage.getItem("key1");
 			var api = ApiRequest(key);
-			var page = DynamicPage();
-			var friends = null;
+			var page = {
+				dynamicMessage: DynamicMessage(),
+				dynamicFriend: DynamicFriend()
+			}
+			api.GetInfo(function (user) {
+				sessionStorage.setItem("user", JSON.stringify(user));
+			});
 			api.ShowFriends(function (users) {
-				page.AddFriends(users);
-				friends = users;
+				page.dynamicFriend.Show(users);
+				sessionStorage.setItem("friends", JSON.stringify(users));
 			});
 			$("#SearchInput").keyup(function (event) {
 				var search = $("#SearchInput").val();
 				if (search != null && ((event.keyCode >= 97 && event.keyCode <= 122) ||
 					(event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 48 && event.keyCode <= 57) ||
 					event.keyCode == 95)) {
-					api.SearchFriends(page.AddFriends, search);
+					api.SearchFriends(search, page.dynamicFriend.Show);
 				}
-				else if (search == null || search.length == 0)
-					page.AddFriends(friends);
+				else if (search == null || search.length == 0) {
+					var friends = sessionStorage.getItem("friends");
+					page.dynamicFriend.Show(JSON.parse(friends));
+				}
 			});
 			$("#Exit").click(function () {
 				localStorage.removeItem("key1");
 				window.location.href = "/Visit/Login";
 			});
 			$("#Friends").on("click", ".Friend", function (event) {
-				loginFriend = $(this).data("login");
-				page.SelectFriend();
+				sessionStorage.setItem("loginFriend", $(this).data("login"));
+				page.dynamicFriend.Select();
 				// post-ajax request to server to get a chat
 			});
 			$("#SendMessage").click(function () {
 				var message = $("#MessageByUser").val();
+				var loginFriend = sessionStorage.getItem("loginFriend");
+				var user = JSON.parse(sessionStorage.getItem("user"));
+				var name = user.FirstName + " " + user.LastName;
 				$("#MessageByUser").val("");
-				page.AppendMessage("Noname", message);
-				page.UpdateMessage(loginFriend, message);
+				page.dynamicMessage.Append(name, message);
+				page.dynamicMessage.Update(loginFriend, message);
 				// add message in server part
 				// 1) post-ajax request to server 
 				// 2) parse message

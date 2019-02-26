@@ -1,60 +1,94 @@
-﻿var ApiRequest = function (apiKey) {
-	var key = apiKey;
+﻿
+function User(login, firstName, lastName) {
+	var Login = login;
+	var FirstName = firstName;
+	var LastName = lastName;
+	this.Get = function () {
+		return {
+			Login, FirstName, LastName
+		}
+	}
+}
+
+function Friend(login, firstName, lastName, lastSeen, online) {
+	var Login = login;
+	var FirstName = firstName;
+	var LastName = lastName;
+	var LastSeen = lastSeen;
+	var Online = online;
+	this.Get = function () {
+		return {
+			Login, FirstName, LastName, LastSeen, Online
+		}
+	}
+}
+
+
+var ApiRequest = function (apiKey) {
+
+	var Key = apiKey;
+	var AjaxPostRequest = function (url, data, callback) {
+
+		if (typeof (callback) != "function")
+			throw new SyntaxError("Parameter callback must be function");
+
+		$.ajax({
+			url: url,
+			type: "POST",
+			data: data,
+			success: function (data) {
+				if (data != null) {
+					callback(data);
+				}
+			},
+			error: function (error) {
+				document.write(error.responseText);
+			}
+		});
+	}
+
 	return {
-		Key: key,
+		Key,
 		ShowFriends: function (callback) {
-			if (typeof (callback) != "function")
-				throw new SyntaxError("Parameter callback must be function");
-			$.ajax({
-				url: "/Api/Friends",
-				type: "POST",
-				data: JSON.stringify({ "key": key }),
-				success: function (friends) {
-					if (friends != null) {
-						callback(friends);
-					}
-				},
-				error: function (error) {
-					document.write(error.responseText);
-				}
-			});
+			var url = "/Api/Friends";
+			var data = JSON.stringify({ "key": Key });
+			AjaxPostRequest(url, data, callback);
 		},
-		SearchFriends: function (callback, str) {
-			if (typeof (callback) != "function")
-				throw new SyntaxError("Parameter callback must be function");
-			$.ajax({
-				url: "/Api/Search",
-				type: "POST",
-				data: JSON.stringify({ "key": key, "search": str }),
-				success: function (users) {
-					callback(users);
-				},
-				error: function (error) {
-					document.write(error.responseText);
-				}
-			});
+		SearchFriends: function (str, callback) {
+			var url = "/Api/Search";
+			var data = JSON.stringify({ "key": Key, "search": str });
+			AjaxPostRequest(url, data, callback);
 		},
 		GetInfo: function (callback) {
-			if (typeof (callback) != "function")
-				throw new SyntaxError("Parameter callback must be function");
-			$.ajax({
-				url: "/Api/Info",
-				type: "POST",
-				data: JSON.stringify({ "key": key }),
-				success: function (info) {
-					callback(info);
-				},
-				error: function (error) {
-					document.write(error.responseText);
-				}
-			});
+			var url = "/Api/Info";
+			var data = JSON.stringify({ "key": Key });
+			AjaxPostRequest(url, data, callback);
+		},
+		ShowInfoFriend: function (login, callback) {
+			var url = "/Api/InfoFriend";
+			var data = JSON.stringify({ "key": Key, "login": login });
+			AjaxPostRequest(url, data, callback);
+		},
+		ShowMessages: function (login, callback) {
+			var url = "/Api/Messages";
+			var data = JSON.stringify({ "key": Key, "login": login });
+			AjaxPostRequest(url, data, callback);
 		}
 	}
 };
 
-var DynamicPage = function () {
+var DynamicFriend = function () {
+
 	return {
-		AddFriends: function (friends) {
+		Select: function () {
+			$("#NotSelectedFriend").css("display", "none");
+			$("#InputMessage").css("display", "block");
+			function ShowChat(login) {
+				alert("Ajax request to show a chat " + login);
+			}
+			return ShowChat;
+		},
+		Show: function (friends) {
 			var makeInfoFriend = "";
 			$.each(friends, function (index, friend) {
 				makeInfoFriend += "<li class='Friend' data-login='" + friend.Login + "'>";
@@ -68,14 +102,16 @@ var DynamicPage = function () {
 			$("#Friends").html("");
 			$("#Friends").append(makeInfoFriend);
 		},
-		SelectFriend: function () {
-			$("#NotSelectedFriend").css("display", "none");
-			$("#InputMessage").css("display", "block");
-			/*function ShowChat() {
+		Add: function (friend) {
 
-			}*/
-		},
-		AppendMessage: function (name, message) {
+		}
+	}
+}
+
+var DynamicMessage = function () {
+
+	return {
+		Append: function (name, message) {
 			var makeMessage = "<li class='Message'>";
 			makeMessage += "<img class='FriendAvatarMessage' src='' />";
 			makeMessage += "<div class='MessageInfo'>";
@@ -85,11 +121,11 @@ var DynamicPage = function () {
 			makeMessage += "</li>";
 			$("#Messages").append(makeMessage);
 		},
-		UpdateMessage: function (login, message) {
+		Update: function (login, message) {
 			$("li[data-login='" + login + "']").find(".LastMessage").text(message.length <= 40 ? message : message.substring(0, 39));
 			var friend = "<li class='Friend' data-login='" + login + "'>" + $("li[data-login='" + login + "']").html() + "</li>";
 			$("li[data-login='" + login + "']").remove();
 			$("#Friends").prepend(friend);
 		}
 	}
-};
+}
