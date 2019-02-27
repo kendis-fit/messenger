@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using Messenger.Models;
 using Messenger.Contexts;
+using Messenger.Code;
 using Newtonsoft.Json;
 
 namespace Messenger.Controllers
@@ -12,6 +13,7 @@ namespace Messenger.Controllers
     public class ApiController : Controller
     {
 		private UserContext db = new UserContext();
+		private MongoMessageRepository dbMessages = new MongoMessageRepository();
 
 		[HttpPost]
 		public JsonResult Key()
@@ -109,6 +111,113 @@ namespace Messenger.Controllers
 				return Json(friends);
 			}
 			return null;
+		}
+
+		[HttpPost]
+		public JsonResult Messages()
+		{
+			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
+			var key = (string)data.key;
+			var login = (string)data.login;
+
+			string loginUser = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
+				.Select(usr => usr.Login).FirstOrDefault();
+			if (loginUser != null)
+			{
+				var messages = dbMessages.GetItemList(loginUser, login);
+				return Json(messages);
+			}
+			return null;
+		}
+
+		[HttpPost]
+		public void Friendship()
+		{
+			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
+			var key = (string)data.key;
+			var login = (string)data.login;
+			var message = (string)data.message;
+			DateTime dateTime = DateTime.Parse((string)data.dateTime);
+			var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
+				.Select(usr => new
+				{
+					usr.Id,
+					usr.Login,
+					usr.FirstName,
+					usr.LastName
+				}).FirstOrDefault();
+			if (user != null)
+			{
+				int? idFriend = db.Users.Where(usr => string.Compare(login, usr.Login) == 0)
+					.Select(usr => usr.Id).FirstOrDefault();
+				if (idFriend != null)
+				{
+					Friend newFriend = new Friend()
+					{
+						UserId = user.Id,
+						FriendId = idFriend.Value,
+						LastMessage = message
+					};
+					Friend reverseNewFriend = new Friend()
+					{
+						UserId = idFriend.Value,
+						FriendId = user.Id,
+						LastMessage = message
+					};
+					db.Friends.Add(newFriend);
+					db.Friends.Add(reverseNewFriend);
+					db.SaveChanges();
+					var Message = new Message
+					{
+						Name = user.FirstName + (user.LastName != null ? " " + user.LastName : ""),
+						Text = message,
+						DateTime = dateTime
+					};
+					dbMessages.Create(Message, user.Login, login);
+				}
+			}
+		}
+
+		[HttpPost]
+		public void SendingMessage()
+		{
+			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
+			var key = (string)data.key;
+			var login = (string)data.login;
+			var message = (string)data.message;
+			var dateTime = DateTime.Parse((string)data.dateTime);
+			var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
+				.Select(usr => new
+				{
+					usr.Id,
+					usr.Login,
+					usr.FirstName,
+					usr.LastName
+				}).FirstOrDefault();
+			if (user != null)
+			{
+				int? idFriend = db.Users.Where(usr => string.Compare(usr.Login, login) == 0)
+					.Select(usr => usr.Id).FirstOrDefault();
+				if (idFriend != null)
+				{
+					var Message = new Message
+					{
+						Name = user.FirstName + (user.LastName != null ? " " + user.LastName : ""),
+						Text = message,
+						DateTime = dateTime
+					};
+					var friendField1 = db.Friends.Where(usr => usr.UserId == user.Id &&
+					usr.FriendId == idFriend.Value).FirstOrDefault();
+					friendField1.LastMessage = message;
+					var friendField2 = db.Friends.Where(usr => usr.UserId == idFriend.Value &&
+					usr.FriendId == user.Id).FirstOrDefault();
+					friendField2.LastMessage = message;
+					db.Entry(friendField1).State = System.Data.Entity.EntityState.Modified;
+					db.Entry(friendField2).State = System.Data.Entity.EntityState.Modified;
+					db.SaveChanges();
+					dbMessages.Update(Message, user.Login, login);
+				}
+			}
 		}
 
 		[HttpPost]

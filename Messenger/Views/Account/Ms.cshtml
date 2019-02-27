@@ -63,8 +63,7 @@
 	<script src="~/Scripts/ms.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function () {
-			var key = localStorage.getItem("key1");
-			var api = ApiRequest(key);
+			var api = ApiRequest(localStorage.getItem("key1"));
 			var page = {
 				dynamicMessage: DynamicMessage(),
 				dynamicFriend: DynamicFriend()
@@ -93,23 +92,45 @@
 				window.location.href = "/Visit/Login";
 			});
 			$("#Friends").on("click", ".Friend", function (event) {
-				sessionStorage.setItem("loginFriend", $(this).data("login"));
+				var friend = {
+					"Login": $(this).data("login"),
+					"Name": $(this).find(".Name").text(),
+				};
+				sessionStorage.setItem("friend", JSON.stringify(friend));
 				page.dynamicFriend.Select();
-				// post-ajax request to server to get a chat
+				api.ShowMessages(friend.Login, page.dynamicMessage.Show);
 			});
 			$("#SendMessage").click(function () {
 				var message = $("#MessageByUser").val();
-				var loginFriend = sessionStorage.getItem("loginFriend");
+				var friend = JSON.parse(sessionStorage.getItem("friend"));
 				var user = JSON.parse(sessionStorage.getItem("user"));
 				var name = user.FirstName + " " + user.LastName;
 				$("#MessageByUser").val("");
 				page.dynamicMessage.Append(name, message);
-				page.dynamicMessage.Update(loginFriend, message);
-				// add message in server part
-				// 1) post-ajax request to server 
-				// 2) parse message
-				// 3) find a chat
-				// ...
+				var countMessages = $('.Message').length;
+				if (countMessages == 1) {
+					api.CreateFriendship(friend.Login, message, new Date().toUTCString());
+					var newFriend = {
+						"Login": friend.Login,
+						"FirstName": friend.Name.split(" ")[0],
+						"LastName": friend.Name.split(" ")[1],
+						"LastMessage": message
+					};
+					var friends = JSON.parse(sessionStorage.getItem("friends"));
+					friends.push(newFriend);
+					sessionStorage.setItem("friends", JSON.stringify("friends"));
+				}
+				else {
+					var friends = JSON.parse(sessionStorage.getItem("friends"));
+					for (var frnd in friends)
+						if (frnd.Login == friend.Login)
+							frnd.LastMessage = message;
+					sessionStorage.setItem("friends", JSON.stringify(friends));
+					api.SendMessage(friend.Login, message, new Date().toUTCString());
+					search = $("#SearchInput").val();
+					if (search == null || search.length == 0)
+						page.dynamicMessage.Update(friend.Login, message);
+				}
 			});
 			// future functional:
 			// in real time show to client online his friend

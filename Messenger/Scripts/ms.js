@@ -1,35 +1,9 @@
-﻿
-function User(login, firstName, lastName) {
-	var Login = login;
-	var FirstName = firstName;
-	var LastName = lastName;
-	this.Get = function () {
-		return {
-			Login, FirstName, LastName
-		}
-	}
-}
-
-function Friend(login, firstName, lastName, lastSeen, online) {
-	var Login = login;
-	var FirstName = firstName;
-	var LastName = lastName;
-	var LastSeen = lastSeen;
-	var Online = online;
-	this.Get = function () {
-		return {
-			Login, FirstName, LastName, LastSeen, Online
-		}
-	}
-}
-
-
-var ApiRequest = function (apiKey) {
+﻿var ApiRequest = function (apiKey) {
 
 	var Key = apiKey;
 	var AjaxPostRequest = function (url, data, callback) {
 
-		if (typeof (callback) != "function")
+		if (typeof (callback) != "function" && typeof (callback) != "undefined")
 			throw new SyntaxError("Parameter callback must be function");
 
 		$.ajax({
@@ -37,7 +11,7 @@ var ApiRequest = function (apiKey) {
 			type: "POST",
 			data: data,
 			success: function (data) {
-				if (data != null) {
+				if (data != null && callback != undefined) {
 					callback(data);
 				}
 			},
@@ -73,6 +47,16 @@ var ApiRequest = function (apiKey) {
 			var url = "/Api/Messages";
 			var data = JSON.stringify({ "key": Key, "login": login });
 			AjaxPostRequest(url, data, callback);
+		},
+		SendMessage: function (login, message, dateTime) {
+			var url = "/Api/SendingMessage";
+			var data = JSON.stringify({ "key": Key, "login": login, "message": message, "dateTime": dateTime });
+			AjaxPostRequest(url, data);
+		},
+		CreateFriendship: function (login, message, dateTime) {
+			var url = "/Api/Friendship";
+			var data = JSON.stringify({ "key": Key, "login": login, "message": message, "dateTime": dateTime });
+			AjaxPostRequest(url, data);
 		}
 	}
 };
@@ -83,10 +67,6 @@ var DynamicFriend = function () {
 		Select: function () {
 			$("#NotSelectedFriend").css("display", "none");
 			$("#InputMessage").css("display", "block");
-			function ShowChat(login) {
-				alert("Ajax request to show a chat " + login);
-			}
-			return ShowChat;
 		},
 		Show: function (friends) {
 			var makeInfoFriend = "";
@@ -102,8 +82,16 @@ var DynamicFriend = function () {
 			$("#Friends").html("");
 			$("#Friends").append(makeInfoFriend);
 		},
-		Add: function (friend) {
-
+		Append: function (login, name, message) {
+			var makeInfoFriend = "";
+			makeInfoFriend += "<li class='Friend' data-login='" + login + "'>";
+			makeInfoFriend += "<img class='FriendAvatar' src='' />";
+			makeInfoFriend += "<div class='FriendInfo'>";
+			makeInfoFriend += "<span class='Name'>" + name + "</span><br>";
+			makeInfoFriend += "<span class='LastMessage'>" + message + "</span>";
+			makeInfoFriend += "</div>";
+			makeInfoFriend += "</li>";
+			$("#Friends").prepend(makeInfoFriend);
 		}
 	}
 }
@@ -126,6 +114,20 @@ var DynamicMessage = function () {
 			var friend = "<li class='Friend' data-login='" + login + "'>" + $("li[data-login='" + login + "']").html() + "</li>";
 			$("li[data-login='" + login + "']").remove();
 			$("#Friends").prepend(friend);
+		},
+		Show: function (messages) {
+			var makeMessages = "";
+			$.each(messages, function (index, message) {
+				makeMessages += "<li class='Message'>";
+				makeMessages += "<img class='FriendAvatarMessage' src='' />";
+				makeMessages += "<div class='MessageInfo'>";
+				makeMessages += "<div class='NameUserMessage'>" + message.Name + "</div>";
+				makeMessages += "<div class='AnyMessage'>" + message.Text + "</div>";
+				makeMessages += "</div>";
+				makeMessages += "</li>";
+			});
+			$("#Messages").html("");
+			$("#Messages").append(makeMessages);
 		}
 	}
 }
