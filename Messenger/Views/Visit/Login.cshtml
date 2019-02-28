@@ -3,23 +3,30 @@
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<form method="post" action="~/Visit/Login" id="Form-Post">
+@section MetaReferences {
+	<link rel="stylesheet" type="text/css" href="~/Content/Login.css" />
+}
+
+<header id="Page">
+	<div id="Panel"><a href="/Visit/Login">Limonne</a></div>
 	@Html.ValidationSummary()
-	<table>
-		<tr>
-			<td><label>Login</label></td>
-			<td><input type="text" name="Login" id="Login" required /></td>
-		</tr>
-		<tr>
-			<td><label>Password</label></td>
-			<td><input type="password" name="Password" id="Password" required /></td>
-		</tr>
-		<tr>
-			<td><button type="button" id="Sign-Up">Sign up</button></td>
-			<td><button type="button" id="Sign-In">Sign in</button></td>
-		</tr>
-	</table>
-</form>
+	<form method="post" action="~/Visit/Login" id="Form-Post">
+		<table id="Authorization">
+			<tr>
+				<td class="Space"><label>Login</label></td>
+				<td><input type="text" name="Login" id="Login" required /></td>
+			</tr>
+			<tr>
+				<td class="Space"><label>Password</label></td>
+				<td><input type="password" name="Password" id="Password" required /></td>
+			</tr>
+			<tr>
+				<td class="Space"><button type="button" id="Sign-Up">Sign up</button></td>
+				<td class="Space"><button type="button" id="Sign-In">Sign in</button></td>
+			</tr>
+		</table>
+	</form>
+</header>
 
 @section Scripts {
 	<script type="text/javascript" src="~/Scripts/sha-256 compressed.js"></script>

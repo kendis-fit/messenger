@@ -1,0 +1,67 @@
+﻿body {
+	background-color: lavender;
+}
+
+header {
+	left: 35%;
+	top: 30%;
+	position: fixed;
+}
+
+div#Panel {
+	background-color: mediumspringgreen;
+	border-bottom: 3px dashed black;
+	border-radius: 5px 5px 0px 0px;
+	height: 50px;
+	text-align: center;
+}
+
+div#Panel a {
+	font-size: 32px;
+	font-family: cursive;
+	text-decoration: none;
+	color: white;
+}
+
+table#Authorization {
+	background-color: mediumspringgreen;
+	border-left: 5px solid deepskyblue;
+	border-radius: 0px 0px 5px 5px;
+	height: 120px;
+	width: 300px;
+}
+
+#Password, #Login {
+	border: 2px solid firebrick;
+	border-radius: 5px;
+}
+
+td label {
+	font-family: cursive;
+	font-size: 18px;
+	color: white;
+}
+
+.Space {
+	padding-left: 20px;
+}
+
+#Sign-Up, #Sign-In {
+	color: gold;
+	font-weight: bold;
+	font-size: 18px;
+	text-decoration: underline;
+	font-family: sans-serif;
+	background-color: inherit;
+	border: 0;
+}
+
+#Sign-In {
+	margin-left: 40px;
+}
+
+.validation-summary-valid ul {
+	background-color: mediumspringgreen;
+	margin: 0;
+	padding: 0;
+}

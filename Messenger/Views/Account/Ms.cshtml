@@ -81,13 +81,22 @@
 				if (search != null && ((event.keyCode >= 97 && event.keyCode <= 122) ||
 					(event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 48 && event.keyCode <= 57) ||
 					event.keyCode == 95)) {
-					api.SearchFriends(search, page.dynamicFriend.Show);
+					api.SearchFriends(search, function (users) {
+						for (var i = 0; i < users.length; ++i)
+						{
+							for (var j = 0; j < friends.length; ++j)
+								if (users[i].Login == friends[j].Login)
+									users[i].LastMessage = friends[j].LastMessage;
+						}
+						page.dynamicFriend.Show(users);
+					});
 				}
 				else if (search == null || search.length == 0) {
 					page.dynamicFriend.Show(friends);
 				}
 			});
 			$("#Exit").click(function () {
+				// request
 				localStorage.removeItem("key1");
 				window.location.href = "/Visit/Login";
 			});
@@ -145,9 +154,9 @@
 					friends.push(newFriend);
 				}
 				else {
-					for (var frnd in friends)
-						if (frnd.Login == friend.Login)
-							frnd.LastMessage = message;
+					for (var i = 0; i < friends.length; ++i)
+						if (friends[i].Login == friend.Login)
+							friends[i].LastMessage = message;
 					api.SendMessage(friend.Login, message, new Date().toUTCString());
 					search = $("#SearchInput").val();
 				}
