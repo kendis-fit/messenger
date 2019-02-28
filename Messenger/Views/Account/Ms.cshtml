@@ -68,12 +68,13 @@
 				dynamicMessage: DynamicMessage(),
 				dynamicFriend: DynamicFriend()
 			}
+			var friends = null;
 			api.GetInfo(function (user) {
 				sessionStorage.setItem("user", JSON.stringify(user));
 			});
 			api.ShowFriends(function (users) {
 				page.dynamicFriend.Show(users);
-				sessionStorage.setItem("friends", JSON.stringify(users));
+				friends = users;
 			});
 			$("#SearchInput").keyup(function (event) {
 				var search = $("#SearchInput").val();
@@ -83,8 +84,7 @@
 					api.SearchFriends(search, page.dynamicFriend.Show);
 				}
 				else if (search == null || search.length == 0) {
-					var friends = sessionStorage.getItem("friends");
-					page.dynamicFriend.Show(JSON.parse(friends));
+					page.dynamicFriend.Show(friends);
 				}
 			});
 			$("#Exit").click(function () {
@@ -94,13 +94,39 @@
 			$("#Friends").on("click", ".Friend", function (event) {
 				var friend = {
 					"Login": $(this).data("login"),
-					"Name": $(this).find(".Name").text(),
+					"Name": $(this).find(".Name").text()
 				};
 				sessionStorage.setItem("friend", JSON.stringify(friend));
 				page.dynamicFriend.Select();
 				api.ShowMessages(friend.Login, page.dynamicMessage.Show);
 			});
+			$("#MessageByUser").keyup(function (event) {
+				var message = $("#MessageByUser").val().slice(0, -1);
+				var keyEnter = 13;
+				if (event.keyCode == keyEnter) {
+					if (!IsEmptyMessage(message))
+						SendMessage();
+				}
+			});
 			$("#SendMessage").click(function () {
+				var message = $("#MessageByUser").val();
+				if (!IsEmptyMessage(message))
+					SendMessage();
+			});
+
+			function IsEmptyMessage(str) {
+				if (str == null || str.length == 0)
+					return true;
+				for (var i = 0; i < str.length; ++i) {
+					var symbol = str[i].charCodeAt(0);
+					console.log(symbol);
+					if (!((symbol >= 0 && symbol <= 32) || symbol == 127))
+						return false;
+				}
+				return true;
+			};
+
+			function SendMessage() {
 				var message = $("#MessageByUser").val();
 				var friend = JSON.parse(sessionStorage.getItem("friend"));
 				var user = JSON.parse(sessionStorage.getItem("user"));
@@ -116,22 +142,17 @@
 						"LastName": friend.Name.split(" ")[1],
 						"LastMessage": message
 					};
-					var friends = JSON.parse(sessionStorage.getItem("friends"));
 					friends.push(newFriend);
-					sessionStorage.setItem("friends", JSON.stringify("friends"));
 				}
 				else {
-					var friends = JSON.parse(sessionStorage.getItem("friends"));
 					for (var frnd in friends)
 						if (frnd.Login == friend.Login)
 							frnd.LastMessage = message;
-					sessionStorage.setItem("friends", JSON.stringify(friends));
 					api.SendMessage(friend.Login, message, new Date().toUTCString());
 					search = $("#SearchInput").val();
-					if (search == null || search.length == 0)
-						page.dynamicMessage.Update(friend.Login, message);
 				}
-			});
+				page.dynamicMessage.Update(friend.Login, message);
+			};
 			// future functional:
 			// in real time show to client online his friend
 			// in real time get with client a messages from friends

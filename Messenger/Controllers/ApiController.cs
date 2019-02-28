@@ -105,8 +105,9 @@ namespace Messenger.Controllers
 						result.user.Login,
 						result.user.FirstName,
 						result.user.LastName,
-						result.friend.LastMessage
-					});
+						result.friend.LastMessage,
+						result.friend.TimeMessage
+					}).OrderByDescending(result => result.TimeMessage);
 
 				return Json(friends);
 			}
@@ -156,13 +157,15 @@ namespace Messenger.Controllers
 					{
 						UserId = user.Id,
 						FriendId = idFriend.Value,
-						LastMessage = message
+						LastMessage = message,
+						TimeMessage = dateTime
 					};
 					Friend reverseNewFriend = new Friend()
 					{
 						UserId = idFriend.Value,
 						FriendId = user.Id,
-						LastMessage = message
+						LastMessage = message,
+						TimeMessage = dateTime
 					};
 					db.Friends.Add(newFriend);
 					db.Friends.Add(reverseNewFriend);
@@ -209,9 +212,11 @@ namespace Messenger.Controllers
 					var friendField1 = db.Friends.Where(usr => usr.UserId == user.Id &&
 					usr.FriendId == idFriend.Value).FirstOrDefault();
 					friendField1.LastMessage = message;
+					friendField1.TimeMessage = dateTime;
 					var friendField2 = db.Friends.Where(usr => usr.UserId == idFriend.Value &&
 					usr.FriendId == user.Id).FirstOrDefault();
 					friendField2.LastMessage = message;
+					friendField2.TimeMessage = dateTime;
 					db.Entry(friendField1).State = System.Data.Entity.EntityState.Modified;
 					db.Entry(friendField2).State = System.Data.Entity.EntityState.Modified;
 					db.SaveChanges();

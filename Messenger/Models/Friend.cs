@@ -9,5 +9,7 @@
 		public int FriendId { get; set; }
 
 		public string LastMessage { get; set; }
+
+		public System.DateTime TimeMessage { get; set; }
 	}
 }
