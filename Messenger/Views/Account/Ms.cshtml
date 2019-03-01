@@ -70,31 +70,22 @@
 				dynamicMessage: DynamicMessage(),
 				dynamicFriend: DynamicFriend()
 			}
-			var friends = null;
 			api.GetInfo(function (user) {
 				sessionStorage.setItem("user", JSON.stringify(user));
 			});
 			api.ShowFriends(function (users) {
 				page.dynamicFriend.Show(users);
-				friends = users;
 			});
 			$("#SearchInput").keyup(function (event) {
 				var search = $("#SearchInput").val();
 				if (search != null && ((event.keyCode >= 97 && event.keyCode <= 122) ||
 					(event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 48 && event.keyCode <= 57) ||
 					event.keyCode == 95)) {
-					api.SearchFriends(search, function (users) {
-						for (var i = 0; i < users.length; ++i)
-						{
-							for (var j = 0; j < friends.length; ++j)
-								if (users[i].Login == friends[j].Login)
-									users[i].LastMessage = friends[j].LastMessage;
-						}
-						page.dynamicFriend.Show(users);
-					});
+					//api.SearchFriends(search, page.dynamicFriend.Show);
+					page.dynamicFriend.Search(search);
 				}
 				else if (search == null || search.length == 0) {
-					page.dynamicFriend.Show(friends);
+					api.ShowFriends(page.dynamicFriend.Show);
 				}
 			});
 			$("#Exit").click(function () {
@@ -150,19 +141,8 @@
 				var countMessages = $('.Message').length;
 				if (countMessages == 1) {
 					api.CreateFriendship(friend.Login, message.Text, message.DateTime.toLocaleString());
-					var newFriend = {
-						"Login": friend.Login,
-						"FirstName": friend.Name.split(" ")[0],
-						"LastName": friend.Name.split(" ")[1],
-						"LastMessage": message.Text,
-						"TimeMessage": message.DateTime//
-					};
-					friends.push(newFriend);
 				}
 				else {
-					for (var i = 0; i < friends.length; ++i)//
-						if (friends[i].Login == friend.Login)
-							friends[i].LastMessage = message.Text;
 					api.SendMessage(friend.Login, message.Text, message.DateTime.toLocaleString());
 					search = $("#SearchInput").val();
 				}

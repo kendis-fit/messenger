@@ -94,6 +94,17 @@ var DynamicFriend = function () {
 			$("#InputMessage").css("display", "block");
 			$("#ScrollMessages").css("display", "block");
 		},
+		Search: function (pattern) {
+			var tags = [];
+			$.each($("tr.Friend"), function (index, friend) {
+				if ($(friend).data("login").indexOf(pattern) < 0 &&
+					$(friend).find(".Name").text().indexOf(pattern) < 0)
+					tags.push($(friend));
+			});
+			$.each(tags, function (index, tag) {
+				$(tag).remove();
+			});
+		},
 		Show: function (friends) {
 			var makeInfoFriend = "";
 			$.each(friends, function (index, friend) {
