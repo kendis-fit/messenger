@@ -36,7 +36,7 @@ namespace Messenger.Code
 						{
 							Name = data.Name,
 							Text = data.Text,
-							DateTime = data.DateTime
+							DateTime = DateTime.SpecifyKind(data.DateTime, DateTimeKind.Local)
 						};
 						Messages.Add(mess);
 					}

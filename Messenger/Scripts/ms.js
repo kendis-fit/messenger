@@ -1,4 +1,29 @@
-﻿var ApiRequest = function (apiKey) {
+﻿
+Date.prototype.VisualTime = function () {
+	var seconds = this.getSeconds();
+	var minutes = this.getMinutes();
+	var hours = this.getHours();
+	if (hours < 10)
+		hours = "0" + hours;
+	if (minutes < 10)
+		minutes = "0" + minutes;
+	if (seconds < 10)
+		seconds = "0" + seconds;
+	return hours + ":" + minutes + ":" + seconds;
+};
+
+Date.prototype.VisualDate = function () {
+	var month = this.getMonth() + 1;
+	var day = this.getDate();
+	var year = this.getFullYear();
+	if (month < 10)
+		month = "0" + month;
+	if (day < 10)
+		day = "0" + day;
+	return month + "/" + day + "/" + year;
+};
+
+var ApiRequest = function (apiKey) {
 
 	var Key = apiKey;
 	var AjaxPostRequest = function (url, data, callback) {
@@ -67,30 +92,37 @@ var DynamicFriend = function () {
 		Select: function () {
 			$("#NotSelectedFriend").css("display", "none");
 			$("#InputMessage").css("display", "block");
+			$("#ScrollMessages").css("display", "block");
 		},
 		Show: function (friends) {
 			var makeInfoFriend = "";
 			$.each(friends, function (index, friend) {
-				makeInfoFriend += "<li class='Friend' data-login='" + friend.Login + "'>";
-				makeInfoFriend += "<img class='FriendAvatar' src='' />";
-				makeInfoFriend += "<div class='FriendInfo'>";
+				// example date from server: /Date(1551474527000)/
+				var dateTime = new Date(Number.parseInt(friend.TimeMessage.substr(6, 13)));
+				var dateOrTime = dateTime.toDateString() == new Date().toDateString() ?
+					dateTime.VisualTime() : dateTime.VisualDate();
+				makeInfoFriend += "<tr class='Friend' data-login='" + friend.Login + "'>";
+				makeInfoFriend += "<td class='FriendAvatar'><img src='' /></td>";
+				makeInfoFriend += "<td class='FriendInfo'>";
 				makeInfoFriend += "<span class='Name'>" + friend.FirstName + " " + (friend.LastName != undefined ? friend.LastName : "") + "</span><br>";
 				makeInfoFriend += "<span class='LastMessage'>" + (friend.LastMessage != undefined ? friend.LastMessage : "") + "</span>";
-				makeInfoFriend += "</div>";
-				makeInfoFriend += "</li>";
+				makeInfoFriend += "</td>";
+				makeInfoFriend += "<td class='Time'><time>" + dateOrTime + "</time></td>";
+				makeInfoFriend += "</tr>";
 			});
 			$("#Friends").html("");
 			$("#Friends").append(makeInfoFriend);
 		},
-		Append: function (login, name, message) {
+		Append: function (friend) {
 			var makeInfoFriend = "";
-			makeInfoFriend += "<li class='Friend' data-login='" + login + "'>";
-			makeInfoFriend += "<img class='FriendAvatar' src='' />";
-			makeInfoFriend += "<div class='FriendInfo'>";
-			makeInfoFriend += "<span class='Name'>" + name + "</span><br>";
-			makeInfoFriend += "<span class='LastMessage'>" + message + "</span>";
-			makeInfoFriend += "</div>";
-			makeInfoFriend += "</li>";
+			makeInfoFriend += "<tr class='Friend' data-login='" + friend.Login + "'>";
+			makeInfoFriend += "<td class='FriendAvatar'><img src='' /></td>";
+			makeInfoFriend += "<td class='FriendInfo'>";
+			makeInfoFriend += "<span class='Name'>" + friend.FirstName + " " + (friend.LastName != undefined ? friend.LastName : "") + "</span><br>";
+			makeInfoFriend += "<span class='LastMessage'>" + (friend.LastMessage != undefined ? friend.LastMessage : "") + "</span>";
+			makeInfoFriend += "</td>";
+			makeInfoFriend += "<td class='Time'><time>" + friend.TimeMessage + "</time></td>";
+			makeInfoFriend += "</tr>";
 			$("#Friends").prepend(makeInfoFriend);
 		}
 	}
@@ -99,35 +131,41 @@ var DynamicFriend = function () {
 var DynamicMessage = function () {
 
 	return {
-		Append: function (name, message) {
-			var makeMessage = "<li class='Message'>";
-			makeMessage += "<img class='FriendAvatarMessage' src='' />";
-			makeMessage += "<div class='MessageInfo'>";
-			makeMessage += "<div class='NameUserMessage'>" + name + "</div>";
-			makeMessage += "<div class='AnyMessage'>" + message + "</div>";
-			makeMessage += "</div>";
-			makeMessage += "</li>";
+		Append: function (message) {
+			var makeMessage = "<tr class='Message'>";
+			makeMessage += "<td class='FriendAvatarMessage'><img src='' /></td>";
+			makeMessage += "<td class='MessageInfo'>";
+			makeMessage += "<span class='NameSender'>" + message.Name + "</span><br>";
+			makeMessage += "<span class='TextMessage'>" + message.Text + "</span>";
+			makeMessage += "</td>";
+			makeMessage += "<td class='TimeMessage'><time>" + message.DateTime.VisualDate() + " " + message.DateTime.VisualTime() + "</time></td>";
+			makeMessage += "</tr>";
 			$("#Messages").append(makeMessage);
 		},
-		Update: function (login, message) {
-			$("li[data-login='" + login + "']").find(".LastMessage").text(message.length <= 40 ? message : message.substring(0, 39));
-			var friend = "<li class='Friend' data-login='" + login + "'>" + $("li[data-login='" + login + "']").html() + "</li>";
-			$("li[data-login='" + login + "']").remove();
+		Update: function (login, message, time) {
+			$("tr[data-login='" + login + "']").find(".LastMessage").text(message.length <= 40 ? message : message.substring(0, 39));
+			$("tr[data-login='" + login + "']").find(".Time").html("<time>" + time + "</time");
+			var friend = "<tr class='Friend' data-login='" + login + "'>" + $("tr[data-login='" + login + "']").html() + "</tr>";
+			$("tr[data-login='" + login + "']").remove();
 			$("#Friends").prepend(friend);
 		},
 		Show: function (messages) {
 			var makeMessages = "";
 			$.each(messages, function (index, message) {
-				makeMessages += "<li class='Message'>";
-				makeMessages += "<img class='FriendAvatarMessage' src='' />";
-				makeMessages += "<div class='MessageInfo'>";
-				makeMessages += "<div class='NameUserMessage'>" + message.Name + "</div>";
-				makeMessages += "<div class='AnyMessage'>" + message.Text + "</div>";
-				makeMessages += "</div>";
-				makeMessages += "</li>";
+				// example date from server: /Date(1551474527000)/
+				var dateTime = new Date(Number.parseInt(message.DateTime.substr(6, 13)));
+				makeMessages += "<tr class='Message'>";
+				makeMessages += "<td class='FriendAvatarMessage'><img src='' /></td>";
+				makeMessages += "<td class='MessageInfo'>";
+				makeMessages += "<span class='NameSender'>" + message.Name + "</span><br>";
+				makeMessages += "<span class='TextMessage'>" + message.Text + "</span>";
+				makeMessages += "</td>";
+				makeMessages += "<td class='TimeMessage'><time>" + dateTime.VisualDate() + " " + dateTime.VisualTime() + "</time></td>";
+				makeMessages += "</tr>";
 			});
 			$("#Messages").html("");
 			$("#Messages").append(makeMessages);
+			$("#ScrollMessages").scrollTop($(document).height());
 		}
 	}
 }

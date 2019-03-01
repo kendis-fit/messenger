@@ -42,15 +42,17 @@
 				<img id="SearchIcon" src="~/Images/search.png" />
 				<input type="text" placeholder="search" id="SearchInput" />
 			</div>
-			<ul id="Friends">
-			</ul>
+			<div id="ScrollFriends">
+				<table id="Friends">
+				</table>
+			</div>
 		</div>
 		<div id="MessagesAndInputs">
-			<ul id="Messages">
-				<li id="NotSelectedFriend">
-					<span>Select a friend</span>
-				</li>
-			</ul>
+			<div id="NotSelectedFriend">Select a chat</div>
+			<div id="ScrollMessages">
+				<table id="Messages">
+				</table>
+			</div>
 			<div id="InputMessage">
 				<textarea placeholder="write a message" id="MessageByUser"></textarea><br>
 				<button type="button" id="SendMessage"><span>Send</span></button>
@@ -128,7 +130,6 @@
 					return true;
 				for (var i = 0; i < str.length; ++i) {
 					var symbol = str[i].charCodeAt(0);
-					console.log(symbol);
 					if (!((symbol >= 0 && symbol <= 32) || symbol == 127))
 						return false;
 				}
@@ -136,31 +137,36 @@
 			};
 
 			function SendMessage() {
-				var message = $("#MessageByUser").val();
 				var friend = JSON.parse(sessionStorage.getItem("friend"));
 				var user = JSON.parse(sessionStorage.getItem("user"));
-				var name = user.FirstName + " " + user.LastName;
+				var message = {
+					"Name": user.FirstName + " " + user.LastName,
+					"Text": $("#MessageByUser").val(),
+					"DateTime": new Date()
+				};
 				$("#MessageByUser").val("");
-				page.dynamicMessage.Append(name, message);
+				page.dynamicMessage.Append(message);
+				$("#ScrollMessages").scrollTop($(document).height());
 				var countMessages = $('.Message').length;
 				if (countMessages == 1) {
-					api.CreateFriendship(friend.Login, message, new Date().toUTCString());
+					api.CreateFriendship(friend.Login, message.Text, message.DateTime.toLocaleString());
 					var newFriend = {
 						"Login": friend.Login,
 						"FirstName": friend.Name.split(" ")[0],
 						"LastName": friend.Name.split(" ")[1],
-						"LastMessage": message
+						"LastMessage": message.Text,
+						"TimeMessage": message.DateTime//
 					};
 					friends.push(newFriend);
 				}
 				else {
-					for (var i = 0; i < friends.length; ++i)
+					for (var i = 0; i < friends.length; ++i)//
 						if (friends[i].Login == friend.Login)
-							friends[i].LastMessage = message;
-					api.SendMessage(friend.Login, message, new Date().toUTCString());
+							friends[i].LastMessage = message.Text;
+					api.SendMessage(friend.Login, message.Text, message.DateTime.toLocaleString());
 					search = $("#SearchInput").val();
 				}
-				page.dynamicMessage.Update(friend.Login, message);
+				page.dynamicMessage.Update(friend.Login, message.Text, message.DateTime.VisualTime());
 			};
 			// future functional:
 			// in real time show to client online his friend

@@ -100,6 +100,7 @@ namespace Messenger.Controllers
 					friend => friend.UserId,
 					(user, friend) => new { user, friend })
 					.Where(result => idFriends.Contains(result.user.Id))
+					.OrderByDescending(result => result.friend.TimeMessage)
 					.Select(result => new
 					{
 						result.user.Login,
@@ -107,7 +108,7 @@ namespace Messenger.Controllers
 						result.user.LastName,
 						result.friend.LastMessage,
 						result.friend.TimeMessage
-					}).OrderByDescending(result => result.TimeMessage);
+					});
 
 				return Json(friends);
 			}
@@ -174,7 +175,7 @@ namespace Messenger.Controllers
 					{
 						Name = user.FirstName + (user.LastName != null ? " " + user.LastName : ""),
 						Text = message,
-						DateTime = dateTime
+						DateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)
 					};
 					dbMessages.Create(Message, user.Login, login);
 				}
@@ -207,7 +208,7 @@ namespace Messenger.Controllers
 					{
 						Name = user.FirstName + (user.LastName != null ? " " + user.LastName : ""),
 						Text = message,
-						DateTime = dateTime
+						DateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)
 					};
 					var friendField1 = db.Friends.Where(usr => usr.UserId == user.Id &&
 					usr.FriendId == idFriend.Value).FirstOrDefault();
