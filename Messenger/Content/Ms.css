@@ -12,6 +12,34 @@ div#Panel {
 	margin-bottom: 0px;
 }
 
+div#UserInfo {
+	display: none;
+	left: 32%;
+	top: 0;
+	height: 60px;
+	width: 50%;
+	font-family: "Gill Sans", sans-serif;
+	line-height: 60px;
+	position: fixed;
+}
+
+div#UserInfo:hover {
+	background-color: rgba(94, 100, 96, 0.5);
+}
+
+div#UserInfo span.Name {
+	padding-left: 20px;
+	color: black;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+div#UserInfo time.LastSeen {
+	color: lightgoldenrodyellow;
+	font-size: 14px;
+	font-weight: bold;
+}
+
 div#Limonne {
 	float: left;
 }

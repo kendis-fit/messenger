@@ -34,6 +34,10 @@
 		<div id="Limonne">
 			<a href="/Account/Ms">Limonne</a>
 		</div>
+		<div id="UserInfo">
+			<span class="Name"></span>
+			<time class="LastSeen"></time>
+		</div>
 		<button type="button" id="Exit">Exit</button>
 	</div>
 	<div id="Main">
@@ -100,7 +104,9 @@
 					"Name": $(this).find(".Name").text()
 				};
 				sessionStorage.setItem("friend", JSON.stringify(friend));
-				page.dynamicFriend.Select();
+				api.GetInfoFriend(friend.Login, function (friend) {
+					page.dynamicFriend.Select(friend);
+				});
 				api.ShowMessages(friend.Login, page.dynamicMessage.Show);
 			});
 			$("#MessageByUser").keyup(function (event) {

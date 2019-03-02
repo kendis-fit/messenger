@@ -63,7 +63,7 @@ var ApiRequest = function (apiKey) {
 			var data = JSON.stringify({ "key": Key });
 			AjaxPostRequest(url, data, callback);
 		},
-		ShowInfoFriend: function (login, callback) {
+		GetInfoFriend: function (login, callback) {
 			var url = "/Api/InfoFriend";
 			var data = JSON.stringify({ "key": Key, "login": login });
 			AjaxPostRequest(url, data, callback);
@@ -105,10 +105,16 @@ var ApiRequest = function (apiKey) {
 var DynamicFriend = function () {
 
 	return {
-		Select: function () {
+		Select: function (user) {
+			var dateTime = new Date(Number.parseInt(user.LastSeen.substr(6, 13)));
+			var dateTimeOrTime = dateTime.toDateString() == new Date().toDateString() ?
+				dateTime.VisualTime() : dateTime.VisualDate() + " " + dateTime.VisualTime();
 			$("#NotSelectedFriend").css("display", "none");
 			$("#InputMessage").css("display", "block");
 			$("#ScrollMessages").css("display", "block");
+			$("#UserInfo").css("display", "block");
+			$("#UserInfo").find(".Name").text(user.FirstName + (user.LastName == null ? "" : " " + user.LastName));
+			$("#UserInfo").find(".LastSeen").text(!user.Online ? "Last seen at " + dateTimeOrTime : "Online");
 		},
 		Search: function (pattern) {
 			var tags = [];
