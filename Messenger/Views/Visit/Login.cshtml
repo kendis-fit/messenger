@@ -8,9 +8,12 @@
 }
 
 <header id="Page">
-	<div id="Panel"><a href="/Visit/Login">Limonne</a></div>
-	@Html.ValidationSummary()
+	<div id="Panel">
+		<a href="/Visit/Login">Limonne</a>
+		@Html.ValidationSummary()
+	</div>
 	<form method="post" action="~/Visit/Login" id="Form-Post">
+		<input type="hidden" name="Password" id="Password" />
 		<table id="Authorization">
 			<tr>
 				<td class="Space"><label>Login</label></td>
@@ -18,7 +21,7 @@
 			</tr>
 			<tr>
 				<td class="Space"><label>Password</label></td>
-				<td><input type="password" name="Password" id="Password" required /></td>
+				<td><input type="password" id="Visual-Password" required /></td>
 			</tr>
 			<tr>
 				<td class="Space"><button type="button" id="Sign-Up">Sign up</button></td>
@@ -48,9 +51,11 @@
 			});
 			$("#Sign-In").click(function () {
 				var login = $("#Login").val();
-				var password = $("#Password").val();
+				var password = $("#Visual-Password").val();
 				var user = new User(login, password);
 				user.Password = user.EncryptPassword(sha256);
+				if (password.length != 0)
+					$("#Password").val(user.Password);
 				request.SetKey(user, function (key) {
 					if (key != null)
 						localStorage.setItem("key1", key);

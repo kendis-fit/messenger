@@ -37,6 +37,11 @@ button#Exit {
 	border-radius: inherit;
 }
 
+button#Exit:hover {
+	border: 2px solid black;
+	background-color: royalblue;
+}
+
 div#SearchAndFriends {
 	float: left;
 	width: 30%;

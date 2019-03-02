@@ -89,9 +89,10 @@
 				}
 			});
 			$("#Exit").click(function () {
-				// request
-				localStorage.removeItem("key1");
-				window.location.href = "/Visit/Login";
+				api.Exit(new Date().toLocaleString(), function () {
+					localStorage.removeItem("key1");
+					window.location.href = "/Visit/Login";
+				});
 			});
 			$("#Friends").on("click", ".Friend", function (event) {
 				var friend = {

@@ -82,6 +82,22 @@ var ApiRequest = function (apiKey) {
 			var url = "/Api/Friendship";
 			var data = JSON.stringify({ "key": Key, "login": login, "message": message, "dateTime": dateTime });
 			AjaxPostRequest(url, data);
+		},
+		Exit: function (dateTime, callback) {
+			var url = "/Api/Exit";
+			var data = JSON.stringify({ "key": Key, "dateTime": dateTime });
+			AjaxPostRequest(url, data, callback);
+			//$.ajax({
+			//	url: "/Api/Exit",
+			//	type: "POST",
+			//	data: JSON.stringify({ "key": Key, "dateTime": dateTime }),
+			//	success: function () {
+			//		callback();
+			//	},
+			//	error: function (error) {
+			//		document.write(error.responseText);
+			//	}
+			//});
 		}
 	}
 };

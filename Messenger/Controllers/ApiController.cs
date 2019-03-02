@@ -232,11 +232,13 @@ namespace Messenger.Controllers
 			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
 			string key = (string)data.key;
 			string search = (string)data.search;
-			var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0).FirstOrDefault();
-			if (user != null)
+			var login = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
+				.Select(usr => usr.Login)
+				.FirstOrDefault();
+			if (login != null)
 			{
 				var users = db.Users.Where(usr => usr.Login.Contains(search) &&
-					string.Compare(user.Login, usr.Login) != 0) 
+					string.Compare(login, usr.Login) != 0) 
 					.Select(usr => new
 					{
 						usr.Login,
@@ -246,6 +248,22 @@ namespace Messenger.Controllers
 				return Json(users);
 			}
 			return null;
+		}
+
+		[HttpPost]
+		public void Exit()
+		{
+			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
+			string key = (string)data.key;
+			var dateTime = DateTime.Parse((string)data.dateTime);
+			var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0).FirstOrDefault();
+			if (user != null)
+			{
+				user.Online = false;
+				user.LastSeen = dateTime;
+				db.Entry(user).State = System.Data.Entity.EntityState.Modified;
+				db.SaveChanges();
+			}
 		}
 
 		protected override void Dispose(bool disposing)

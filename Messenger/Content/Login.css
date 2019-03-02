@@ -12,7 +12,7 @@ div#Panel {
 	background-color: mediumspringgreen;
 	border-bottom: 3px dashed black;
 	border-radius: 5px 5px 0px 0px;
-	height: 50px;
+	height: 20%;
 	text-align: center;
 }
 
@@ -31,7 +31,7 @@ table#Authorization {
 	width: 300px;
 }
 
-#Password, #Login {
+#Visual-Password, #Login {
 	border: 2px solid firebrick;
 	border-radius: 5px;
 }
@@ -56,6 +56,11 @@ td label {
 	border: 0;
 }
 
+#Sign-In:hover,#Sign-Up:hover {
+	background-color: blueviolet;
+	border-radius: 0px 15px 0px 10px;
+}
+
 #Sign-In {
 	margin-left: 40px;
 }
@@ -64,4 +69,11 @@ td label {
 	background-color: mediumspringgreen;
 	margin: 0;
 	padding: 0;
+}
+
+.validation-summary-errors ul {
+	border-top: 3px dashed black;
+	text-align: left;
+	background-color: mediumspringgreen;
+	padding-top: 15px;
 }
