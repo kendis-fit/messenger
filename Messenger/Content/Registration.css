@@ -1,0 +1,77 @@
+﻿body {
+	background-color: lavender;
+}
+
+header {
+	left: 35%;
+	top: 30%;
+	position: fixed;
+}
+
+table#Registration {
+	border-left: 5px solid deepskyblue;
+	background-color: mediumspringgreen;
+	border-radius: 0px 0px 5px 5px;
+	height: 250px;
+	width: 325px;
+}
+
+table#Registration td {
+	padding-left: 15px;
+}
+
+td label {
+	font-family: cursive;
+	font-size: 18px;
+	color: white;
+}
+
+td input {
+	border: 2px solid firebrick;
+	border-radius: 5px;
+}
+
+div#Panel {
+	background-color: mediumspringgreen;
+	border-bottom: 3px dashed black;
+	border-radius: 5px 5px 0px 0px;
+	height: 50px;
+	text-align: center;
+}
+
+div#Panel a {
+	font-size: 32px;
+	font-family: cursive;
+	text-decoration: none;
+	color: white;
+}
+
+button#Register {
+	color: gold;
+	font-weight: bold;
+	font-size: 18px;
+	text-decoration: underline;
+	font-family: sans-serif;
+	background-color: inherit;
+	border: 0;
+	float: right;
+}
+
+button#Register:hover {
+	background-color: blueviolet;
+	border-radius: 0px 15px 0px 10px;
+}
+
+.validation-summary-valid ul {
+	background-color: mediumspringgreen;
+	margin: 0;
+	padding: 0;
+}
+
+.validation-summary-errors ul {
+	border-top: 3px dashed black;
+	text-align: left;
+	background-color: mediumspringgreen;
+	padding-top: 15px;
+}
+
