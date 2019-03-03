@@ -99,7 +99,8 @@ namespace Messenger.Controllers
 					user => user.Id,
 					friend => friend.UserId,
 					(user, friend) => new { user, friend })
-					.Where(result => idFriends.Contains(result.user.Id))
+					.Where(result => idFriends.Contains(result.user.Id) &&
+					result.friend.FriendId == idUser.Value)
 					.OrderByDescending(result => result.friend.TimeMessage)
 					.Select(result => new
 					{
@@ -250,21 +251,22 @@ namespace Messenger.Controllers
 			return null;
 		}
 
-		[HttpPost]
-		public void Exit()
-		{
-			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
-			string key = (string)data.key;
-			var dateTime = DateTime.Parse((string)data.dateTime);
-			var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0).FirstOrDefault();
-			if (user != null)
-			{
-				user.Online = false;
-				user.LastSeen = dateTime;
-				db.Entry(user).State = System.Data.Entity.EntityState.Modified;
-				db.SaveChanges();
-			}
-		}
+		//[HttpPost]
+		//public void Exit()
+		//{
+		//	var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
+		//	string key = (string)data.key;
+		//	var dateTime = DateTime.Parse((string)data.dateTime);
+		//	var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0).FirstOrDefault();
+		//	if (user != null)
+		//	{
+		//		user.Online = false;
+		//		user.ConnectionId = null;
+		//		user.LastSeen = dateTime;
+		//		db.Entry(user).State = System.Data.Entity.EntityState.Modified;
+		//		db.SaveChanges();
+		//	}
+		//}
 
 		protected override void Dispose(bool disposing)
 		{

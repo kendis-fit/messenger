@@ -8,7 +8,7 @@ namespace Messenger.Models
 		public int Id { get; set; }
 
 		[Required]
-		[MinLength(6, ErrorMessage = "Field login must have min length as min 8 symbols")]
+		[MinLength(6, ErrorMessage = "Field login must have min length as min 6 symbols")]
 		public string Login { get; set; }
 		
 		[Required]
@@ -33,5 +33,7 @@ namespace Messenger.Models
 		public bool Online { get; set; } = false;
 
 		public string Authorization { get; set; } = Guid.NewGuid().ToString();
+
+		public string ConnectionId { get; set; }
 	}
 }

@@ -23,6 +23,14 @@ Date.prototype.VisualDate = function () {
 	return month + "/" + day + "/" + year;
 };
 
+Date.ParseServerDate = function (str) {
+	// example date from server: /Date(1551474527000)/
+	if (typeof str != "string")
+		throw new SyntaxError("Parameter str must be string");
+	var dateTime = new Date(Number.parseInt(str.substr(6, 13)));
+	return dateTime;
+};
+
 var ApiRequest = function (apiKey) {
 
 	var Key = apiKey;
@@ -87,17 +95,6 @@ var ApiRequest = function (apiKey) {
 			var url = "/Api/Exit";
 			var data = JSON.stringify({ "key": Key, "dateTime": dateTime });
 			AjaxPostRequest(url, data, callback);
-			//$.ajax({
-			//	url: "/Api/Exit",
-			//	type: "POST",
-			//	data: JSON.stringify({ "key": Key, "dateTime": dateTime }),
-			//	success: function () {
-			//		callback();
-			//	},
-			//	error: function (error) {
-			//		document.write(error.responseText);
-			//	}
-			//});
 		}
 	}
 };
@@ -106,7 +103,7 @@ var DynamicFriend = function () {
 
 	return {
 		Select: function (user) {
-			var dateTime = new Date(Number.parseInt(user.LastSeen.substr(6, 13)));
+			var dateTime = Date.ParseServerDate(user.LastSeen);
 			var dateTimeOrTime = dateTime.toDateString() == new Date().toDateString() ?
 				dateTime.VisualTime() : dateTime.VisualDate() + " " + dateTime.VisualTime();
 			$("#NotSelectedFriend").css("display", "none");
@@ -130,8 +127,7 @@ var DynamicFriend = function () {
 		Show: function (friends) {
 			var makeInfoFriend = "";
 			$.each(friends, function (index, friend) {
-				// example date from server: /Date(1551474527000)/
-				var dateTime = new Date(Number.parseInt(friend.TimeMessage.substr(6, 13)));
+				var dateTime = Date.ParseServerDate(friend.TimeMessage);
 				var dateOrTime = dateTime.toDateString() == new Date().toDateString() ?
 					dateTime.VisualTime() : dateTime.VisualDate();
 				makeInfoFriend += "<tr class='Friend' data-login='" + friend.Login + "'>";
@@ -174,19 +170,32 @@ var DynamicMessage = function () {
 			makeMessage += "<td class='TimeMessage'><time>" + message.DateTime.VisualDate() + " " + message.DateTime.VisualTime() + "</time></td>";
 			makeMessage += "</tr>";
 			$("#Messages").append(makeMessage);
+			$("#ScrollMessages").scrollTop($(document).height());
 		},
-		Update: function (login, message, time) {
-			$("tr[data-login='" + login + "']").find(".LastMessage").text(message.length <= 40 ? message : message.substring(0, 39));
-			$("tr[data-login='" + login + "']").find(".Time").html("<time>" + time + "</time");
-			var friend = "<tr class='Friend' data-login='" + login + "'>" + $("tr[data-login='" + login + "']").html() + "</tr>";
-			$("tr[data-login='" + login + "']").remove();
-			$("#Friends").prepend(friend);
+		Update: function (login, message) {
+			if ($("tr[data-login='" + login + "']").length) {
+				$("tr[data-login='" + login + "']").find(".LastMessage")
+					.text(message.Text.length <= 40 ? message.Text : message.Text.substring(0, 39));
+				$("tr[data-login='" + login + "']").find(".Time").html("<time>" + message.DateTime.VisualTime() + "</time");
+				var friend = "<tr class='Friend' data-login='" + login + "'>" + $("tr[data-login='" + login + "']").html() + "</tr>";
+				$("tr[data-login='" + login + "']").remove();
+				$("#Friends").prepend(friend);
+			}
+			else {
+				var friend = {
+					"Login": login,
+					"FirstName": message.Name,
+					"LastMessage": message.Text,
+					"TimeMessage": message.DateTime.VisualTime()
+				};
+				Append(message);
+				DynamicFriend().Append(friend);
+			}
 		},
 		Show: function (messages) {
 			var makeMessages = "";
 			$.each(messages, function (index, message) {
-				// example date from server: /Date(1551474527000)/
-				var dateTime = new Date(Number.parseInt(message.DateTime.substr(6, 13)));
+				var dateTime = Date.ParseServerDate(message.DateTime);
 				makeMessages += "<tr class='Message'>";
 				makeMessages += "<td class='FriendAvatarMessage'><img src='' /></td>";
 				makeMessages += "<td class='MessageInfo'>";

@@ -66,25 +66,47 @@
 </header>
 
 @section Scripts {
-	<script src="~/Scripts/ms.js"></script>
+	<script type="text/javascript" src="~/Scripts/jquery.signalR-2.4.0.min.js"></script>
+	<script src="~/signalr/hubs"></script>
+	<script type="text/javascript" src="~/Scripts/ms.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function () {
+			// init
+			var real_time = $.connection.apiHub;
 			var api = ApiRequest(localStorage.getItem("key1"));
 			var page = {
 				dynamicMessage: DynamicMessage(),
 				dynamicFriend: DynamicFriend()
 			}
+			// begin: main info
 			api.GetInfo(function (user) {
 				sessionStorage.setItem("user", JSON.stringify(user));
 			});
 			api.ShowFriends(function (users) {
 				page.dynamicFriend.Show(users);
 			});
+			// begin: real-time
+			real_time.client.getMessage = function (login, message) {
+				var friend = JSON.parse(sessionStorage.getItem("friend"));
+				if (login == friend.Login) {
+					message.DateTime = new Date(message.DateTime);
+					page.dynamicMessage.Append(message);
+				}
+				page.dynamicMessage.Update(login, message);
+			};
+			real_time.client.isOnlineFriend = function (user) {
+				console.log(user.Login)
+				var friend = JSON.parse(sessionStorage.getItem("friend"));
+				if (user.Login == friend.Login) {
+					page.dynamicFriend.Select(user);
+				}
+			};
+			// events
 			$("#SearchInput").keyup(function (event) {
 				var search = $("#SearchInput").val();
-				if (search != null && ((event.keyCode >= 97 && event.keyCode <= 122) ||
+				if (search != null)/* && ((event.keyCode >= 97 && event.keyCode <= 122) ||
 					(event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 48 && event.keyCode <= 57) ||
-					event.keyCode == 95)) {
+					event.keyCode == 95))*/ {
 					//api.SearchFriends(search, page.dynamicFriend.Show);
 					page.dynamicFriend.Search(search);
 				}
@@ -93,10 +115,9 @@
 				}
 			});
 			$("#Exit").click(function () {
-				api.Exit(new Date().toLocaleString(), function () {
-					localStorage.removeItem("key1");
-					window.location.href = "/Visit/Login";
-				});
+				localStorage.removeItem("key1");
+				sessionStorage.clear();
+				window.location.href = "/Visit/Login";
 			});
 			$("#Friends").on("click", ".Friend", function (event) {
 				var friend = {
@@ -109,18 +130,44 @@
 				});
 				api.ShowMessages(friend.Login, page.dynamicMessage.Show);
 			});
-			$("#MessageByUser").keyup(function (event) {
-				var message = $("#MessageByUser").val().slice(0, -1);
-				var keyEnter = 13;
-				if (event.keyCode == keyEnter) {
-					if (!IsEmptyMessage(message))
-						SendMessage();
-				}
-			});
-			$("#SendMessage").click(function () {
-				var message = $("#MessageByUser").val();
-				if (!IsEmptyMessage(message))
-					SendMessage();
+
+			$.connection.hub.start().done(function () {
+				real_time.server.connect(api.Key);
+				$("#MessageByUser").keyup(function (event) {
+					var mess = $("#MessageByUser").val().slice(0, -1);
+					var keyEnter = 13;
+					if (event.keyCode == keyEnter) {
+						if (!IsEmptyMessage(mess)) {
+							var friend = JSON.parse(sessionStorage.getItem("friend"));
+							var user = JSON.parse(sessionStorage.getItem("user"));
+							var message = {
+								"Name": user.FirstName + " " + user.LastName,
+								"Text": mess,
+								"DateTime": new Date()
+							};
+							$("#MessageByUser").val("");
+							page.dynamicMessage.Append(message);
+							SendMessage(user, friend, message);
+							real_time.server.send(api.Key, user.Login, friend.Login, message);
+						}
+					}
+				});
+				$("#SendMessage").click(function () {
+					var mess = $("#MessageByUser").val();
+					if (!IsEmptyMessage(mess)) {
+						var friend = JSON.parse(sessionStorage.getItem("friend"));
+						var user = JSON.parse(sessionStorage.getItem("user"));
+						var message = {
+							"Name": user.FirstName + " " + user.LastName,
+							"Text": mess,
+							"DateTime": new Date()
+						};
+						$("#MessageByUser").val("");
+						page.dynamicMessage.Append(message);
+						SendMessage(friend.Login, message);
+						real_time.server.send(api.Key, user.Login, friend.Login, message);
+					}
+				});
 			});
 
 			function IsEmptyMessage(str) {
@@ -134,26 +181,15 @@
 				return true;
 			};
 
-			function SendMessage() {
-				var friend = JSON.parse(sessionStorage.getItem("friend"));
-				var user = JSON.parse(sessionStorage.getItem("user"));
-				var message = {
-					"Name": user.FirstName + " " + user.LastName,
-					"Text": $("#MessageByUser").val(),
-					"DateTime": new Date()
-				};
-				$("#MessageByUser").val("");
-				page.dynamicMessage.Append(message);
-				$("#ScrollMessages").scrollTop($(document).height());
+			function SendMessage(login, message) {
 				var countMessages = $('.Message').length;
 				if (countMessages == 1) {
-					api.CreateFriendship(friend.Login, message.Text, message.DateTime.toLocaleString());
+					api.CreateFriendship(login, message.Text, message.DateTime.toLocaleString());
 				}
 				else {
-					api.SendMessage(friend.Login, message.Text, message.DateTime.toLocaleString());
-					search = $("#SearchInput").val();
+					api.SendMessage(login, message.Text, message.DateTime.toLocaleString());
 				}
-				page.dynamicMessage.Update(friend.Login, message.Text, message.DateTime.VisualTime());
+				page.dynamicMessage.Update(login, message);
 			};
 			// future functional:
 			// in real time show to client online his friend

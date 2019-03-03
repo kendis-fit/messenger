@@ -37,12 +37,7 @@ namespace Messenger.Controllers
 				var user = db.Users.Where(usr => string.Compare(User.Login, usr.Login) == 0 &&
 					string.Compare(usr.Password, User.Password) == 0).FirstOrDefault();
 				if (user != null)
-				{
-					user.Online = true;
-					db.Entry(user).State = System.Data.Entity.EntityState.Modified;
-					db.SaveChanges();
 					return RedirectToAction("Ms", "Account");
-				}
 				else
 					ModelState.AddModelError("", "Login or password is not correct");
 			}

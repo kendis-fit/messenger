@@ -95,7 +95,7 @@ div#Search img {
 
 div#Search #SearchInput {
 	border: 0;
-	background-color: inherit;
+	background-color: transparent;
 	top: 85px;
 	font-size: 14px;
 	position: absolute;
