@@ -72,6 +72,7 @@
 	<script type="text/javascript">
 		$(document).ready(function () {
 			// init
+			sessionStorage.removeItem("friend");
 			var real_time = $.connection.apiHub;
 			var api = ApiRequest(localStorage.getItem("key1"));
 			var page = {
@@ -88,17 +89,22 @@
 			// begin: real-time
 			real_time.client.getMessage = function (login, message) {
 				var friend = JSON.parse(sessionStorage.getItem("friend"));
-				if (login == friend.Login) {
-					message.DateTime = new Date(message.DateTime);
-					page.dynamicMessage.Append(message);
+				message.DateTime = new Date(message.DateTime);
+				if (friend != null) {
+					if (login == friend.Login) {
+						page.dynamicMessage.Append(message);
+					}
 				}
 				page.dynamicMessage.Update(login, message);
 			};
 			real_time.client.isOnlineFriend = function (user) {
-				console.log(user.Login)
+				//console.log(user.LastSeen)
 				var friend = JSON.parse(sessionStorage.getItem("friend"));
-				if (user.Login == friend.Login) {
-					page.dynamicFriend.Select(user);
+				if (friend != null) {
+					if (user.Login == friend.Login) {
+						user.LastSeen = new Date(user.LastSeen);
+						page.dynamicFriend.Select(user);
+					}
 				}
 			};
 			// events
@@ -126,6 +132,7 @@
 				};
 				sessionStorage.setItem("friend", JSON.stringify(friend));
 				api.GetInfoFriend(friend.Login, function (friend) {
+					friend.LastSeen = Date.ParseServerDate(friend.LastSeen);
 					page.dynamicFriend.Select(friend);
 				});
 				api.ShowMessages(friend.Login, page.dynamicMessage.Show);
@@ -147,7 +154,7 @@
 							};
 							$("#MessageByUser").val("");
 							page.dynamicMessage.Append(message);
-							SendMessage(user, friend, message);
+							SendMessage(friend.Login, message);
 							real_time.server.send(api.Key, user.Login, friend.Login, message);
 						}
 					}

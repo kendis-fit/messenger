@@ -23,27 +23,27 @@ namespace Messenger.Code
 
 		public IEnumerable<Message> GetItemList(string nameUser, string nameFriend)
 		{
-			List<Message> Messages = new List<Message>();
-			var messages = db.GetCollection<Message>(nameUser + "_" + nameFriend);
-			using (var cursor = messages.FindSync(new BsonDocument()))
-			{
-				while (cursor.MoveNext())
-				{
-					var message = cursor.Current;
-					foreach (var data in message)
-					{
-						Message mess = new Message
-						{
-							Name = data.Name,
-							Text = data.Text,
-							DateTime = DateTime.SpecifyKind(data.DateTime, DateTimeKind.Local)
-						};
-						Messages.Add(mess);
-					}
-				}
-			}
+			//List<Message> Messages = new List<Message>();
+			var messages = db.GetCollection<Message>(nameUser + "_" + nameFriend).Find(x => true).ToList();
+			//using (var cursor = messages.FindSync(new BsonDocument()))
+			//{
+			//	while (cursor.MoveNext())
+			//	{
+			//		var message = cursor.Current;
+			//		foreach (var data in message)
+			//		{
+			//			Message mess = new Message
+			//			{
+			//				Name = data.Name,
+			//				Text = data.Text,
+			//				DateTime = DateTime.SpecifyKind(data.DateTime, DateTimeKind.Local)
+			//			};
+			//			Messages.Add(mess);
+			//		}
+			//	}
+			//}
 
-			return Messages;
+			return messages;
 		}
 
 		public void Create(Message message, string nameUser, string nameFriend)

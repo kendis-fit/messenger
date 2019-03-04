@@ -103,9 +103,8 @@ var DynamicFriend = function () {
 
 	return {
 		Select: function (user) {
-			var dateTime = Date.ParseServerDate(user.LastSeen);
-			var dateTimeOrTime = dateTime.toDateString() == new Date().toDateString() ?
-				dateTime.VisualTime() : dateTime.VisualDate() + " " + dateTime.VisualTime();
+			var dateTimeOrTime = user.LastSeen.toDateString() == new Date().toDateString() ?
+				user.LastSeen.VisualTime() : user.LastSeen.VisualDate() + " " + user.LastSeen.VisualTime();
 			$("#NotSelectedFriend").css("display", "none");
 			$("#InputMessage").css("display", "block");
 			$("#ScrollMessages").css("display", "block");
@@ -170,7 +169,7 @@ var DynamicMessage = function () {
 			makeMessage += "<td class='TimeMessage'><time>" + message.DateTime.VisualDate() + " " + message.DateTime.VisualTime() + "</time></td>";
 			makeMessage += "</tr>";
 			$("#Messages").append(makeMessage);
-			$("#ScrollMessages").scrollTop($(document).height());
+			$("#ScrollMessages").scrollTop(1000000);
 		},
 		Update: function (login, message) {
 			if ($("tr[data-login='" + login + "']").length) {
@@ -207,7 +206,7 @@ var DynamicMessage = function () {
 			});
 			$("#Messages").html("");
 			$("#Messages").append(makeMessages);
-			$("#ScrollMessages").scrollTop($(document).height());
+			$("#ScrollMessages").scrollTop(1000000);
 		}
 	}
 }
