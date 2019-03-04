@@ -135,7 +135,7 @@ var DynamicFriend = function () {
 				makeInfoFriend += "<span class='Name'>" + friend.FirstName + " " + (friend.LastName != undefined ? friend.LastName : "") + "</span><br>";
 				makeInfoFriend += "<span class='LastMessage'>" + (friend.LastMessage != undefined ? friend.LastMessage : "") + "</span>";
 				makeInfoFriend += "</td>";
-				makeInfoFriend += "<td class='Time'><time>" + dateOrTime + "</time></td>";
+				makeInfoFriend += "<td class='TimeAndCountNotReadMessages'><time>" + dateOrTime + "</time></td>";
 				makeInfoFriend += "</tr>";
 			});
 			$("#Friends").html("");
@@ -149,7 +149,7 @@ var DynamicFriend = function () {
 			makeInfoFriend += "<span class='Name'>" + friend.FirstName + " " + (friend.LastName != undefined ? friend.LastName : "") + "</span><br>";
 			makeInfoFriend += "<span class='LastMessage'>" + (friend.LastMessage != undefined ? friend.LastMessage : "") + "</span>";
 			makeInfoFriend += "</td>";
-			makeInfoFriend += "<td class='Time'><time>" + friend.TimeMessage + "</time></td>";
+			makeInfoFriend += "<td class='TimeAndCountNotReadMessages'><time>" + friend.TimeMessage + "</time></td>";
 			makeInfoFriend += "</tr>";
 			$("#Friends").prepend(makeInfoFriend);
 		}
@@ -170,6 +170,22 @@ var DynamicMessage = function () {
 			makeMessage += "</tr>";
 			$("#Messages").append(makeMessage);
 			$("#ScrollMessages").scrollTop(1000000);
+		},
+		ExistsCountNotRead: function (login) {
+			return ($("tr[data-login='" + login + "']").find(".CountNotReadMessages").length);
+		},
+		CreateCountNotRead: function (login) {
+			var makeCountNotRead = "<div class='CountNotReadMessages'>";
+			makeCountNotRead += "<span>1</span>";
+			makeCountNotRead += "</div>";
+			$("tr[data-login='" + login + "']").find(".TimeAndCountNotReadMessages").append(makeCountNotRead);
+		},
+		UpdateCountNotRead: function (login) {
+			var count = $("tr[data-login='" + login + "']").find(".TimeAndCountNotReadMessages").find("span").text();
+			$("tr[data-login='" + login + "']").find(".TimeAndCountNotReadMessages").find("span").text(Number.parseInt(count) + 1);
+		},
+		RemoveCountNotRead: function (login) {
+			$("tr[data-login='" + login + "']").find(".CountNotReadMessages").remove();
 		},
 		Update: function (login, message) {
 			if ($("tr[data-login='" + login + "']").length) {

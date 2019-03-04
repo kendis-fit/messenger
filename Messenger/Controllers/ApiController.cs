@@ -21,10 +21,11 @@ namespace Messenger.Controllers
 			var User = JsonConvert.DeserializeObject<LoginUser>(Request.Params[0]);
 			if (ModelState.IsValid)
 			{
-				var user = db.Users.Where(usr => string.Compare(usr.Login, User.Login) == 0 &&
-						string.Compare(usr.Password, User.Password) == 0).FirstOrDefault();
-				if (user != null)
-					return Json(new { key = user.Authorization });
+				var authorization = db.Users.Where(usr => string.Compare(usr.Login, User.Login) == 0 &&
+						string.Compare(usr.Password, User.Password) == 0)
+						.Select(usr => usr.Authorization).FirstOrDefault();
+				if (authorization != null)
+					return Json(new { key = authorization });
 			}
 			return null;
 		}

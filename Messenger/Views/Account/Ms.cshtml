@@ -95,10 +95,15 @@
 						page.dynamicMessage.Append(message);
 					}
 				}
+				if (page.dynamicMessage.ExistsCountNotRead(login)) {
+					page.dynamicMessage.UpdateCountNotRead(login);
+				}
+				else {
+					page.dynamicMessage.CreateCountNotRead(login);
+				}
 				page.dynamicMessage.Update(login, message);
 			};
 			real_time.client.isOnlineFriend = function (user) {
-				//console.log(user.LastSeen)
 				var friend = JSON.parse(sessionStorage.getItem("friend"));
 				if (friend != null) {
 					if (user.Login == friend.Login) {
@@ -130,12 +135,15 @@
 					"Login": $(this).data("login"),
 					"Name": $(this).find(".Name").text()
 				};
+				if (page.dynamicMessage.ExistsCountNotRead(friend.Login)) {
+					page.dynamicMessage.RemoveCountNotRead(friend.Login);
+				}
 				sessionStorage.setItem("friend", JSON.stringify(friend));
+				api.ShowMessages(friend.Login, page.dynamicMessage.Show);
 				api.GetInfoFriend(friend.Login, function (friend) {
 					friend.LastSeen = Date.ParseServerDate(friend.LastSeen);
 					page.dynamicFriend.Select(friend);
 				});
-				api.ShowMessages(friend.Login, page.dynamicMessage.Show);
 			});
 
 			$.connection.hub.start().done(function () {
