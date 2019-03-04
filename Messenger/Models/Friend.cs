@@ -11,5 +11,7 @@
 		public string LastMessage { get; set; }
 
 		public System.DateTime TimeMessage { get; set; }
+
+		public int? CountNotReadMessages { get; set; }
 	}
 }

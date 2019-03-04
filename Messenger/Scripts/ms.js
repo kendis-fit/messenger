@@ -47,6 +47,8 @@ var ApiRequest = function (apiKey) {
 				if (data != null && callback != undefined) {
 					callback(data);
 				}
+				else if (callback != undefined)
+					callback();
 			},
 			error: function (error) {
 				document.write(error.responseText);
@@ -81,14 +83,19 @@ var ApiRequest = function (apiKey) {
 			var data = JSON.stringify({ "key": Key, "login": login });
 			AjaxPostRequest(url, data, callback);
 		},
-		SendMessage: function (login, message, dateTime) {
+		SendMessage: function (login, message, dateTime, callback) {
 			var url = "/Api/SendingMessage";
 			var data = JSON.stringify({ "key": Key, "login": login, "message": message, "dateTime": dateTime });
-			AjaxPostRequest(url, data);
+			AjaxPostRequest(url, data, callback);
 		},
-		CreateFriendship: function (login, message, dateTime) {
+		CreateFriendship: function (login, message, dateTime, callback) {
 			var url = "/Api/Friendship";
 			var data = JSON.stringify({ "key": Key, "login": login, "message": message, "dateTime": dateTime });
+			AjaxPostRequest(url, data, callback);
+		},
+		RemoveCountNotReadMessages: function (login) {
+			var url = "/Api/CountNotReadMessages";
+			var data = JSON.stringify({ "key": Key, "login": login });
 			AjaxPostRequest(url, data);
 		},
 		Exit: function (dateTime, callback) {
@@ -135,7 +142,15 @@ var DynamicFriend = function () {
 				makeInfoFriend += "<span class='Name'>" + friend.FirstName + " " + (friend.LastName != undefined ? friend.LastName : "") + "</span><br>";
 				makeInfoFriend += "<span class='LastMessage'>" + (friend.LastMessage != undefined ? friend.LastMessage : "") + "</span>";
 				makeInfoFriend += "</td>";
-				makeInfoFriend += "<td class='TimeAndCountNotReadMessages'><time>" + dateOrTime + "</time></td>";
+				makeInfoFriend += "<td class='TimeAndCountNotReadMessages'>";
+				makeInfoFriend += "<time>" + dateOrTime + "</time>";
+				console.log(friend.CountNotReadMessages);
+				if (friend.CountNotReadMessages != null) {
+					makeInfoFriend += "<div class='CountNotReadMessages'>";
+					makeInfoFriend += "<span>" + friend.CountNotReadMessages + "</span>";
+					makeInfoFriend += "</div>";
+				}
+				makeInfoFriend += "</td>";
 				makeInfoFriend += "</tr>";
 			});
 			$("#Friends").html("");
@@ -169,7 +184,7 @@ var DynamicMessage = function () {
 			makeMessage += "<td class='TimeMessage'><time>" + message.DateTime.VisualDate() + " " + message.DateTime.VisualTime() + "</time></td>";
 			makeMessage += "</tr>";
 			$("#Messages").append(makeMessage);
-			$("#ScrollMessages").scrollTop(1000000);
+			$("#ScrollMessages").animate({ scrollTop: 1000000 }, 500);
 		},
 		ExistsCountNotRead: function (login) {
 			return ($("tr[data-login='" + login + "']").find(".CountNotReadMessages").length);
@@ -222,7 +237,7 @@ var DynamicMessage = function () {
 			});
 			$("#Messages").html("");
 			$("#Messages").append(makeMessages);
-			$("#ScrollMessages").scrollTop(1000000);
+			$("#ScrollMessages").animate({ scrollTop: 1000000 }, 500);
 		}
 	}
 }

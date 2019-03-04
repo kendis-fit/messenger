@@ -34,13 +34,33 @@ namespace Messenger.Hubs
 		{
 			// sender must have such a fields as login, firstName, lastName
 			// message must have such a fields as lastMessage, timeMessage
-			bool IsCorrectKey = db.Users.Any(user => string.Compare(key, user.Authorization) == 0);
-			if (IsCorrectKey)
+			int? id = db.Users.Where(user => string.Compare(key, user.Authorization) == 0)
+				.Select(user => user.Id).FirstOrDefault();
+			if (id != null)
 			{
-				string friendConnectionId = db.Users.Where(user => string.Compare(loginFriend, user.Login) == 0)
-					.Select(user => user.ConnectionId).FirstOrDefault();
-				if (friendConnectionId != null)
-					Clients.Client(friendConnectionId).getMessage(login, message);
+				var friend = db.Users.Where(user => string.Compare(loginFriend, user.Login) == 0)
+					.Select(user => new
+					{
+						user.ConnectionId,
+						user.Id
+					}).FirstOrDefault();
+				if (friend != null)
+				{
+					if (friend.ConnectionId != null)
+						Clients.Client(friend.ConnectionId).getMessage(login, message);
+					else
+					{
+						var frnd = db.Friends.Where(user => friend.Id == user.FriendId &&
+						id == user.UserId).FirstOrDefault();
+						db.Friends.Attach(frnd);
+						if (frnd.CountNotReadMessages != null)
+							frnd.CountNotReadMessages += 1;
+						else
+							frnd.CountNotReadMessages = 1;
+						//db.Entry(frnd).State = System.Data.Entity.EntityState.Modified;
+						db.SaveChanges();
+					}
+				}
 			}
 		}
 

@@ -136,6 +136,7 @@
 					"Name": $(this).find(".Name").text()
 				};
 				if (page.dynamicMessage.ExistsCountNotRead(friend.Login)) {
+					api.RemoveCountNotReadMessages(friend.Login);
 					page.dynamicMessage.RemoveCountNotRead(friend.Login);
 				}
 				sessionStorage.setItem("friend", JSON.stringify(friend));
@@ -162,8 +163,9 @@
 							};
 							$("#MessageByUser").val("");
 							page.dynamicMessage.Append(message);
-							SendMessage(friend.Login, message);
-							real_time.server.send(api.Key, user.Login, friend.Login, message);
+							SendMessage(friend.Login, message, function () {
+								real_time.server.send(api.Key, user.Login, friend.Login, message);
+							});
 						}
 					}
 				});
@@ -179,8 +181,9 @@
 						};
 						$("#MessageByUser").val("");
 						page.dynamicMessage.Append(message);
-						SendMessage(friend.Login, message);
-						real_time.server.send(api.Key, user.Login, friend.Login, message);
+						SendMessage(friend.Login, message, function () {
+							real_time.server.send(api.Key, user.Login, friend.Login, message);
+						});
 					}
 				});
 			});
@@ -196,19 +199,16 @@
 				return true;
 			};
 
-			function SendMessage(login, message) {
+			function SendMessage(login, message, callback) {
 				var countMessages = $('.Message').length;
 				if (countMessages == 1) {
-					api.CreateFriendship(login, message.Text, message.DateTime.toLocaleString());
+					api.CreateFriendship(login, message.Text, message.DateTime.toLocaleString(), callback);
 				}
 				else {
-					api.SendMessage(login, message.Text, message.DateTime.toLocaleString());
+					api.SendMessage(login, message.Text, message.DateTime.toLocaleString(), callback);
 				}
 				page.dynamicMessage.Update(login, message);
 			};
-			// future functional:
-			// in real time show to client online his friend
-			// in real time get with client a messages from friends
 		});
 	</script>
 }

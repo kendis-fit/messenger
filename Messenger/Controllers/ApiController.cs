@@ -109,7 +109,8 @@ namespace Messenger.Controllers
 						result.user.FirstName,
 						result.user.LastName,
 						result.friend.LastMessage,
-						result.friend.TimeMessage
+						result.friend.TimeMessage,
+						result.friend.CountNotReadMessages
 					});
 
 				return Json(friends);
@@ -180,6 +181,33 @@ namespace Messenger.Controllers
 						DateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)
 					};
 					dbMessages.Create(Message, user.Login, login);
+				}
+			}
+		}
+
+		[HttpPost]
+		public void CountNotReadMessages()
+		{
+			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
+			var key = (string)data.key;
+			var login = (string)data.login;
+
+			int? idUser = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
+				.Select(usr => usr.Id).FirstOrDefault();
+			if (idUser != null)
+			{
+				int? idFriend = db.Users.Where(usr => string.Compare(usr.Login, login) == 0)
+				.Select(usr => usr.Id).FirstOrDefault();
+				if (idFriend != null)
+				{
+					var friendship = db.Friends.Where(user => idUser.Value == user.FriendId &&
+						idFriend.Value == user.UserId).FirstOrDefault();
+					if (friendship != null)
+					{
+						friendship.CountNotReadMessages = null;
+						db.Entry(friendship).State = System.Data.Entity.EntityState.Modified;
+						db.SaveChanges();
+					}
 				}
 			}
 		}
