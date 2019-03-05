@@ -137,7 +137,10 @@ var DynamicFriend = function () {
 				var dateOrTime = dateTime.toDateString() == new Date().toDateString() ?
 					dateTime.VisualTime() : dateTime.VisualDate();
 				makeInfoFriend += "<tr class='Friend' data-login='" + friend.Login + "'>";
-				makeInfoFriend += "<td class='FriendAvatar'><img src='' /></td>";
+				if (friend.Avatar != null)
+					makeInfoFriend += "<td class='FriendAvatar'><img src='" + friend.Avatar + "' /></td>";
+				else
+					makeInfoFriend += "<td class='FriendAvatar'><img src='' /></td>";
 				makeInfoFriend += "<td class='FriendInfo'>";
 				makeInfoFriend += "<span class='Name'>" + friend.FirstName + " " + (friend.LastName != undefined ? friend.LastName : "") + "</span><br>";
 				makeInfoFriend += "<span class='LastMessage'>" + (friend.LastMessage != undefined ? friend.LastMessage : "") + "</span>";

@@ -35,5 +35,7 @@ namespace Messenger.Models
 		public string Authorization { get; set; } = Guid.NewGuid().ToString();
 
 		public string ConnectionId { get; set; }
+
+		public byte[] Avatar { get; set; }
 	}
 }

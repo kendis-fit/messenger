@@ -7,45 +7,64 @@
 	<link rel="stylesheet" type="text/css" href="~/Content/Registration.css" />
 }
 
-<form method="post" action="~/Visit/Registration" id="Form-Post">
-	<input type="hidden" name="Password" id="Password" />
-	<input type="hidden" name="ComparePassword" id="ComparePassword" />
-	@Html.ValidationSummary()
-	<table>
-		<tr>
-			<td><label>Login</label></td>
-			<td><input type="text" name="Login" required /></td>
-		</tr>
-		<tr>
-			<td><label>Email</label></td>
-			<td><input type="email" name="Email" required /></td>
-		</tr>
-		<tr>
-			<td><label>First name</label></td>
-			<td><input type="text" name="FirstName" required /></td>
-		</tr>
-		<tr>
-			<td><label>Last name</label></td>
-			<td><input type="text" name="LastName" /></td>
-		</tr>
-		<tr>
-			<td><label>Password</label></td>
-			<td><input type="password" id="Visual-Password" required /></td>
-		</tr>
-		<tr>
-			<td><label>Try password</label></td>
-			<td><input type="password" id="Visual-ComparePassword" required /></td>
-		</tr>
-		<tr>
-			<td><button type="button" id="Register">Sign-Up</button></td>
-		</tr>
-	</table>
-</form>
+	<header id="Page">
+		<div id="Panel">
+			<a href="/Visit/Login">Limonne</a>
+		</div>
+		<form method="post" action="~/Visit/Registration" id="Form-Post">
+			<input type="hidden" name="Password" id="Password" />
+			<input type="hidden" name="ComparePassword" id="ComparePassword" />
+			<input type="hidden" name="Avatar" id="Avatar" />
+			@Html.ValidationSummary()
+			<table id="Registration">
+				<tr>
+					<td><label>Login</label></td>
+					<td><input type="text" name="Login" required /></td>
+				</tr>
+				<tr>
+					<td><label>Email</label></td>
+					<td><input type="email" name="Email" required /></td>
+				</tr>
+				<tr>
+					<td><label>First name</label></td>
+					<td><input type="text" name="FirstName" required /></td>
+				</tr>
+				<tr>
+					<td><label>Last name</label></td>
+					<td><input type="text" name="LastName" /></td>
+				</tr>
+				<tr>
+					<td><label>Password</label></td>
+					<td><input type="password" id="Visual-Password" required /></td>
+				</tr>
+				<tr>
+					<td><label>Try password</label></td>
+					<td><input type="password" id="Visual-ComparePassword" required /></td>
+				</tr>
+				<tr>
+					<td><label>Avatar</label></td>
+					<td><input type="file" id="Visual-Avatar" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button type="button" id="Register">Sign-Up</button></td>
+				</tr>
+			</table>
+		</form>
+	</header>
 
 @section Scripts {
 	<script type="text/javascript" src="~/Scripts/sha-256 compressed.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function () {
+			$("#Visual-Avatar").change(function () {
+				var fileReader = new FileReader();
+				fileReader.onload = function () {
+					var binary_image = btoa(fileReader.result);
+					$("#Avatar").val(binary_image);
+				};
+				fileReader.readAsDataURL($("#Visual-Avatar").prop("files")[0]);
+			});
 			$("#Register").click(function () {
 				var password = sha256($("#Visual-Password").val(), false);
 				var comparePassword = sha256($("#Visual-ComparePassword").val(), false);

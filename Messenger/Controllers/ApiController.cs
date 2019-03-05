@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using Messenger.Models;
@@ -96,7 +97,7 @@ namespace Messenger.Controllers
 			{
 				var idFriends = db.Friends.Where(friend => friend.UserId == idUser)
 					.Select(friend => friend.FriendId);
-				var friends = db.Users.Join(db.Friends,
+				var friends = db.Users.AsEnumerable().Join(db.Friends,
 					user => user.Id,
 					friend => friend.UserId,
 					(user, friend) => new { user, friend })
@@ -108,6 +109,7 @@ namespace Messenger.Controllers
 						result.user.Login,
 						result.user.FirstName,
 						result.user.LastName,
+						Avatar = result.user.Avatar == null ? null : Encoding.ASCII.GetString(result.user.Avatar),
 						result.friend.LastMessage,
 						result.friend.TimeMessage,
 						result.friend.CountNotReadMessages
