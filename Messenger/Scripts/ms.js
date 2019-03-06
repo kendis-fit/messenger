@@ -100,8 +100,8 @@ var DynamicFriend = function () {
 		Show: function (friends) {
 			var makeInfoFriend = "";
 			$.each(friends, function (index, friend) {
-				var dateTime = Date.ParseServerDate(friend.TimeMessage);
-				var dateOrTime = dateTime.toDateString() == new Date().toDateString() ?
+				var dateTime = (friend.TimeMessage != undefined) ? Date.ParseServerDate(friend.TimeMessage) : undefined;
+				var dateOrTime = (dateTime == undefined) ? undefined : dateTime.toDateString() == new Date().toDateString() ?
 					dateTime.VisualTime() : dateTime.VisualDate();
 				makeInfoFriend += "<tr class='Friend' data-login='" + friend.Login + "'>";
 				if (friend.Avatar != null)
@@ -112,12 +112,14 @@ var DynamicFriend = function () {
 				makeInfoFriend += "<span class='Name'>" + friend.FirstName + " " + (friend.LastName != undefined ? friend.LastName : "") + "</span><br>";
 				makeInfoFriend += "<span class='LastMessage'>" + (friend.LastMessage != undefined ? friend.LastMessage : "") + "</span>";
 				makeInfoFriend += "</td>";
-				makeInfoFriend += "<td class='TimeAndCountNotReadMessages'>";
-				makeInfoFriend += "<time>" + dateOrTime + "</time>";
-				if (friend.CountNotReadMessages != null) {
-					makeInfoFriend += "<div class='CountNotReadMessages'>";
-					makeInfoFriend += "<span>" + friend.CountNotReadMessages + "</span>";
-					makeInfoFriend += "</div>";
+				if (friend.TimeMessage != undefined) {
+					makeInfoFriend += "<td class='TimeAndCountNotReadMessages'>";
+					makeInfoFriend += "<time>" + dateOrTime + "</time>";
+					if (friend.CountNotReadMessages != null) {
+						makeInfoFriend += "<div class='CountNotReadMessages'>";
+						makeInfoFriend += "<span>" + friend.CountNotReadMessages + "</span>";
+						makeInfoFriend += "</div>";
+					}
 				}
 				makeInfoFriend += "</td>";
 				makeInfoFriend += "</tr>";
@@ -180,7 +182,6 @@ var DynamicMessage = function () {
 			$("#ScrollMessages").animate({ scrollTop: 1000000 }, 500);
 		},
 		CountNotRead: DynamicCountNotRead(),
-		Count: function () { return $(".Messages").length; },
 		Update: function (login, message) {
 			if ($("tr[data-login='" + login + "']").length) {
 				$("tr[data-login='" + login + "']").find(".LastMessage")

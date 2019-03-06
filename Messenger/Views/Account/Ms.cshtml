@@ -43,7 +43,7 @@
 	<div id="Main">
 		<div id="SearchAndFriends">
 			<div id="Search">
-				<img id="SearchIcon" src="~/Images/search.png" />
+				<img id="SearchIcon" data-search="friends" src="~/Images/search.png" />
 				<input type="text" placeholder="search" id="SearchInput" />
 			</div>
 			<div id="ScrollFriends">
@@ -116,11 +116,24 @@
 			// events
 			$("#SearchInput").keyup(function () {
 				var search = $("#SearchInput").val();
-				if (search.length != 0)
-					page.dynamicFriend.Search(search);
+				if (search.length != 0) {
+					var searchWho = $("#SearchIcon").data("search");
+					if (searchWho == "friends")
+						page.dynamicFriend.Search(search);
+					else {
+						if (search.IsCorrectSearch() && search.length >= 4)
+							api.SearchFriends(search, page.dynamicFriend.Show);
+						else
+							console.log("Not correct string");
+					}
+				}
 				else
 					api.ShowFriends(page.dynamicFriend.Show);
-				//api.SearchFriends(search, page.dynamicFriend.Show);
+			});
+			$("#SearchIcon").click(function () {
+				var searchWho = $("#SearchIcon").data("search");
+				$("#SearchIcon").data("search", searchWho == "friends" ? "users" : "friends");
+				alert("Search - " + $("#SearchIcon").data("search"));
 			});
 			$("#Exit").click(function () {
 				localStorage.removeItem("key1");
@@ -175,7 +188,7 @@
 				};
 				$("#MessageByUser").val(""); // clear sent
 				page.dynamicMessage.Append(message);
-				if (page.dynamicMessage.Count() == 1) // create correspondence in db
+				if ($(".Message").length <= 1) // create correspondence in db
 					api.CreateFriendship
 						(sessionInfo.friend.Login, message.Text, message.DateTime.toLocaleString(), callback);
 				else

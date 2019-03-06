@@ -64,3 +64,13 @@ String.prototype.IsEmptyMessage = function () {
 	}
 	return true;
 };
+
+String.prototype.IsCorrectSearch = function () {
+	for (var i = 0; i < this.length; ++i) {
+		var symbol = this[i].charCodeAt();
+		if (!((symbol >= 48 && symbol <= 57) || (symbol >= 65 && symbol <= 90) || 
+			(symbol >= 97 && symbol <= 122) || symbol == 95))
+			return false;
+	}
+	return true;
+};

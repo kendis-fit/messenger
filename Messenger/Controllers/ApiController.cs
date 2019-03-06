@@ -265,13 +265,15 @@ namespace Messenger.Controllers
 				.FirstOrDefault();
 			if (login != null)
 			{
-				var users = db.Users.Where(usr => usr.Login.Contains(search) &&
+				var users = db.Users.AsEnumerable().Where(usr => usr.Login.Contains(search) &&
 					string.Compare(login, usr.Login) != 0) 
 					.Select(usr => new
 					{
 						usr.Login,
 						usr.FirstName,
-						usr.LastName
+						usr.LastName,
+						TimeMessage = usr.LastSeen,
+						Avatar = usr.Avatar == null ? null : Encoding.ASCII.GetString(usr.Avatar)
 					});
 				return Json(users);
 			}
