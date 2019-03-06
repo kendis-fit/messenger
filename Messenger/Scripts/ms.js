@@ -142,6 +142,27 @@ var DynamicFriend = function () {
 
 var DynamicMessage = function () {
 
+	var DynamicCountNotRead = function () {
+		return {
+			Exists: function (login) {
+				return ($("tr[data-login='" + login + "']").find(".CountNotReadMessages").length);
+			},
+			Create: function (login) {
+				var makeCountNotRead = "<div class='CountNotReadMessages'>";
+				makeCountNotRead += "<span>1</span>";
+				makeCountNotRead += "</div>";
+				$("tr[data-login='" + login + "']").find(".TimeAndCountNotReadMessages").append(makeCountNotRead);
+			},
+			Update: function (login) {
+				var count = $("tr[data-login='" + login + "']").find(".TimeAndCountNotReadMessages").find("span").text();
+				$("tr[data-login='" + login + "']").find(".TimeAndCountNotReadMessages").find("span").text(Number.parseInt(count) + 1);
+			},
+			Remove: function (login) {
+				$("tr[data-login='" + login + "']").find(".CountNotReadMessages").remove();
+			}
+		}
+	};
+
 	return {
 		Append: function (message) {
 			var makeMessage = "<tr class='Message'>";
@@ -158,22 +179,7 @@ var DynamicMessage = function () {
 			$("#Messages").append(makeMessage);
 			$("#ScrollMessages").animate({ scrollTop: 1000000 }, 500);
 		},
-		ExistsCountNotRead: function (login) {
-			return ($("tr[data-login='" + login + "']").find(".CountNotReadMessages").length);
-		},
-		CreateCountNotRead: function (login) {
-			var makeCountNotRead = "<div class='CountNotReadMessages'>";
-			makeCountNotRead += "<span>1</span>";
-			makeCountNotRead += "</div>";
-			$("tr[data-login='" + login + "']").find(".TimeAndCountNotReadMessages").append(makeCountNotRead);
-		},
-		UpdateCountNotRead: function (login) {
-			var count = $("tr[data-login='" + login + "']").find(".TimeAndCountNotReadMessages").find("span").text();
-			$("tr[data-login='" + login + "']").find(".TimeAndCountNotReadMessages").find("span").text(Number.parseInt(count) + 1);
-		},
-		RemoveCountNotRead: function (login) {
-			$("tr[data-login='" + login + "']").find(".CountNotReadMessages").remove();
-		},
+		CountNotRead: DynamicCountNotRead(),
 		Update: function (login, message) {
 			if ($("tr[data-login='" + login + "']").length) {
 				$("tr[data-login='" + login + "']").find(".LastMessage")

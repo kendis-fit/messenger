@@ -30,7 +30,7 @@ Date.ParseServerDate = function (str) {
 	return dateTime;
 };
 
-String.prototype.IsEmptyString = function () {
+String.prototype.IsEmptyMessage = function () {
 	if (this == null || this.length == 0)
 		return true;
 	for (var i = 0; i < this.length; ++i) {
