@@ -147,7 +147,6 @@ var DynamicFriend = function () {
 				makeInfoFriend += "</td>";
 				makeInfoFriend += "<td class='TimeAndCountNotReadMessages'>";
 				makeInfoFriend += "<time>" + dateOrTime + "</time>";
-				console.log(friend.CountNotReadMessages);
 				if (friend.CountNotReadMessages != null) {
 					makeInfoFriend += "<div class='CountNotReadMessages'>";
 					makeInfoFriend += "<span>" + friend.CountNotReadMessages + "</span>";
@@ -179,6 +178,9 @@ var DynamicMessage = function () {
 	return {
 		Append: function (message) {
 			var makeMessage = "<tr class='Message'>";
+			/*if (message.Avatar != null)
+				makeMessage += "<td class='FriendAvatarMessage'><img src='" + message.Avatar + "' /></td>";
+			else*/
 			makeMessage += "<td class='FriendAvatarMessage'><img src='' /></td>";
 			makeMessage += "<td class='MessageInfo'>";
 			makeMessage += "<span class='NameSender'>" + message.Name + "</span><br>";
@@ -225,11 +227,15 @@ var DynamicMessage = function () {
 				DynamicFriend().Append(friend);
 			}
 		},
-		Show: function (messages) {
+		Show: function (messages, user, friend) {
 			var makeMessages = "";
 			$.each(messages, function (index, message) {
 				var dateTime = Date.ParseServerDate(message.DateTime);
 				makeMessages += "<tr class='Message'>";
+				/*if (user.FirstName + (user.LastName == null ? "" : " " + user.LastName) == message.Name)
+					makeMessages += "<td class='FriendAvatarMessage'><img src='" + user.Avatar + "' /></td>";
+				else
+					makeMessages += "<td class='FriendAvatarMessage'><img src='" + friend.Avatar + "' /></td>";*/
 				makeMessages += "<td class='FriendAvatarMessage'><img src='' /></td>";
 				makeMessages += "<td class='MessageInfo'>";
 				makeMessages += "<span class='NameSender'>" + message.Name + "</span><br>";

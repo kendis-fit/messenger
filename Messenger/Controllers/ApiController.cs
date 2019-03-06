@@ -36,13 +36,14 @@ namespace Messenger.Controllers
 		{
 			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
 			var key = (string)data.key;
-			var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
+			var user = db.Users.AsEnumerable().Where(usr => string.Compare(usr.Authorization, key) == 0)
 				.Select(usr => new
 				{
 					usr.Login,
 					usr.FirstName,
 					usr.LastName,
-					usr.Email
+					usr.Email,
+					Avatar = usr.Avatar == null ? null : Encoding.ASCII.GetString(usr.Avatar)
 				}).FirstOrDefault();
 			if (user != null)
 				return Json(user);
@@ -55,9 +56,8 @@ namespace Messenger.Controllers
 			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
 			var key = (string)data.key;
 			var login = (string)data.login;
-			int? userExist = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
-				.Select(usr => usr.Id).FirstOrDefault();
-			if (userExist != null)
+			bool isCorrectKey = db.Users.Any(usr => string.Compare(usr.Authorization, key) == 0);
+			if (isCorrectKey)
 			{
 				var friend = db.Users.Where(usr => string.Compare(usr.Login, login) == 0)
 					.Select(usr => new
@@ -79,9 +79,8 @@ namespace Messenger.Controllers
 		{
 			var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
 			var key = (string)data.key;
-			int userExists = db.Users.Where(user => string.Compare(user.Authorization, key) == 0)
-				.Select(user => user.Id).Count();
-			if (userExists == 1)
+			bool isCorrectKey = db.Users.Any(usr => string.Compare(usr.Authorization, key) == 0);
+			if (isCorrectKey)
 				return Json(new { check = true });
 			return Json(new { check = false });
 		}
@@ -130,10 +129,7 @@ namespace Messenger.Controllers
 			string loginUser = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0)
 				.Select(usr => usr.Login).FirstOrDefault();
 			if (loginUser != null)
-			{
-				var messages = dbMessages.GetItemList(loginUser, login);
-				return Json(messages);
-			}
+				return Json(dbMessages.GetItemList(loginUser, login));
 			return null;
 		}
 
@@ -281,23 +277,6 @@ namespace Messenger.Controllers
 			}
 			return null;
 		}
-
-		//[HttpPost]
-		//public void Exit()
-		//{
-		//	var data = JsonConvert.DeserializeObject<dynamic>(Request.Params[0]);
-		//	string key = (string)data.key;
-		//	var dateTime = DateTime.Parse((string)data.dateTime);
-		//	var user = db.Users.Where(usr => string.Compare(usr.Authorization, key) == 0).FirstOrDefault();
-		//	if (user != null)
-		//	{
-		//		user.Online = false;
-		//		user.ConnectionId = null;
-		//		user.LastSeen = dateTime;
-		//		db.Entry(user).State = System.Data.Entity.EntityState.Modified;
-		//		db.SaveChanges();
-		//	}
-		//}
 
 		protected override void Dispose(bool disposing)
 		{

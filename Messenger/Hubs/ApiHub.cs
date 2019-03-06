@@ -52,12 +52,11 @@ namespace Messenger.Hubs
 					{
 						var frnd = db.Friends.Where(user => friend.Id == user.FriendId &&
 						id == user.UserId).FirstOrDefault();
-						db.Friends.Attach(frnd);
 						if (frnd.CountNotReadMessages != null)
 							frnd.CountNotReadMessages += 1;
 						else
 							frnd.CountNotReadMessages = 1;
-						//db.Entry(frnd).State = System.Data.Entity.EntityState.Modified;
+						db.Entry(frnd).State = System.Data.Entity.EntityState.Modified;
 						db.SaveChanges();
 					}
 				}

@@ -72,7 +72,10 @@
 	<script type="text/javascript">
 		$(document).ready(function () {
 			// init
-			sessionStorage.removeItem("friend");
+			var sessionInfo = {
+				user: null,
+				friend: null
+			}
 			var real_time = $.connection.apiHub;
 			var api = ApiRequest(localStorage.getItem("key1"));
 			var page = {
@@ -81,17 +84,17 @@
 			}
 			// begin: main info
 			api.GetInfo(function (user) {
-				sessionStorage.setItem("user", JSON.stringify(user));
+				sessionInfo.user = user;
 			});
 			api.ShowFriends(function (users) {
 				page.dynamicFriend.Show(users);
 			});
 			// begin: real-time
 			real_time.client.getMessage = function (login, message) {
-				var friend = JSON.parse(sessionStorage.getItem("friend"));
 				message.DateTime = new Date(message.DateTime);
-				if (friend != null) {
-					if (login == friend.Login) {
+				if (sessionInfo.friend != null) {
+					if (login == sessionInfo.friend.Login) {
+						message.Avatar = sessionInfo.friend.Avatar;
 						page.dynamicMessage.Append(message);
 					}
 				}
@@ -104,9 +107,8 @@
 				page.dynamicMessage.Update(login, message);
 			};
 			real_time.client.isOnlineFriend = function (user) {
-				var friend = JSON.parse(sessionStorage.getItem("friend"));
-				if (friend != null) {
-					if (user.Login == friend.Login) {
+				if (sessionInfo.friend != null) {
+					if (user.Login == sessionInfo.friend.Login) {
 						user.LastSeen = new Date(user.LastSeen);
 						page.dynamicFriend.Select(user);
 					}
@@ -127,21 +129,22 @@
 			});
 			$("#Exit").click(function () {
 				localStorage.removeItem("key1");
-				sessionStorage.clear();
 				window.location.href = "/Visit/Login";
 			});
 			$("#Friends").on("click", ".Friend", function (event) {
-				var friend = {
+				sessionInfo.friend = {
 					"Login": $(this).data("login"),
-					"Name": $(this).find(".Name").text()
+					"Name": $(this).find(".Name").text(),
+					"Avatar": $(this).find("img").attr("src")
 				};
-				if (page.dynamicMessage.ExistsCountNotRead(friend.Login)) {
-					api.RemoveCountNotReadMessages(friend.Login);
-					page.dynamicMessage.RemoveCountNotRead(friend.Login);
+				if (page.dynamicMessage.ExistsCountNotRead(sessionInfo.friend.Login)) {
+					api.RemoveCountNotReadMessages(sessionInfo.friend.Login);
+					page.dynamicMessage.RemoveCountNotRead(sessionInfo.friend.Login);
 				}
-				sessionStorage.setItem("friend", JSON.stringify(friend));
-				api.ShowMessages(friend.Login, page.dynamicMessage.Show);
-				api.GetInfoFriend(friend.Login, function (friend) {
+				api.ShowMessages(sessionInfo.friend.Login, function (messages) {
+					page.dynamicMessage.Show(messages, sessionInfo.user, sessionInfo.friend);
+				});
+				api.GetInfoFriend(sessionInfo.friend.Login, function (friend) {
 					friend.LastSeen = Date.ParseServerDate(friend.LastSeen);
 					page.dynamicFriend.Select(friend);
 				});
@@ -154,17 +157,16 @@
 					var keyEnter = 13;
 					if (event.keyCode == keyEnter) {
 						if (!IsEmptyMessage(mess)) {
-							var friend = JSON.parse(sessionStorage.getItem("friend"));
-							var user = JSON.parse(sessionStorage.getItem("user"));
 							var message = {
-								"Name": user.FirstName + " " + user.LastName,
+								"Name": sessionInfo.user.FirstName + " " + sessionInfo.user.LastName,
 								"Text": mess,
 								"DateTime": new Date()
+								//"Avatar": sessionInfo.user.Avatar
 							};
 							$("#MessageByUser").val("");
 							page.dynamicMessage.Append(message);
-							SendMessage(friend.Login, message, function () {
-								real_time.server.send(api.Key, user.Login, friend.Login, message);
+							SendMessage(sessionInfo.friend.Login, message, function () {
+								real_time.server.send(api.Key, sessionInfo.user.Login, sessionInfo.friend.Login, message);
 							});
 						}
 					}
@@ -172,17 +174,16 @@
 				$("#SendMessage").click(function () {
 					var mess = $("#MessageByUser").val();
 					if (!IsEmptyMessage(mess)) {
-						var friend = JSON.parse(sessionStorage.getItem("friend"));
-						var user = JSON.parse(sessionStorage.getItem("user"));
 						var message = {
-							"Name": user.FirstName + " " + user.LastName,
+							"Name": sessionInfo.user.FirstName + " " + sessionInfo.user.LastName,
 							"Text": mess,
 							"DateTime": new Date()
+							//"Avatar": sessionInfo.user.Avatar
 						};
 						$("#MessageByUser").val("");
 						page.dynamicMessage.Append(message);
-						SendMessage(friend.Login, message, function () {
-							real_time.server.send(api.Key, user.Login, friend.Login, message);
+						SendMessage(sessionInfo.friend.Login, message, function () {
+							real_time.server.send(api.Key, sessionInfo.user.Login, sessionInfo.friend.Login, message);
 						});
 					}
 				});
