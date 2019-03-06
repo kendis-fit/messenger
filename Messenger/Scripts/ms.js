@@ -1,37 +1,4 @@
-﻿
-Date.prototype.VisualTime = function () {
-	var seconds = this.getSeconds();
-	var minutes = this.getMinutes();
-	var hours = this.getHours();
-	if (hours < 10)
-		hours = "0" + hours;
-	if (minutes < 10)
-		minutes = "0" + minutes;
-	if (seconds < 10)
-		seconds = "0" + seconds;
-	return hours + ":" + minutes + ":" + seconds;
-};
-
-Date.prototype.VisualDate = function () {
-	var month = this.getMonth() + 1;
-	var day = this.getDate();
-	var year = this.getFullYear();
-	if (month < 10)
-		month = "0" + month;
-	if (day < 10)
-		day = "0" + day;
-	return month + "/" + day + "/" + year;
-};
-
-Date.ParseServerDate = function (str) {
-	// example date from server: /Date(1551474527000)/
-	if (typeof str != "string")
-		throw new SyntaxError("Parameter str must be string");
-	var dateTime = new Date(Number.parseInt(str.substr(6, 13)));
-	return dateTime;
-};
-
-var ApiRequest = function (apiKey) {
+﻿var ApiRequest = function (apiKey) {
 
 	var Key = apiKey;
 	var AjaxPostRequest = function (url, data, callback) {

@@ -68,6 +68,7 @@
 @section Scripts {
 	<script type="text/javascript" src="~/Scripts/jquery.signalR-2.4.0.min.js"></script>
 	<script src="~/signalr/hubs"></script>
+	<script type="text/javascript" src="~/Scripts/extension.js"></script>
 	<script type="text/javascript" src="~/Scripts/ms.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function () {
@@ -76,7 +77,7 @@
 				user: null,
 				friend: null
 			}
-			var real_time = $.connection.apiHub;
+			var realTime = $.connection.apiHub;
 			var api = ApiRequest(localStorage.getItem("key1"));
 			var page = {
 				dynamicMessage: DynamicMessage(),
@@ -90,7 +91,7 @@
 				page.dynamicFriend.Show(users);
 			});
 			// begin: real-time
-			real_time.client.getMessage = function (login, message) {
+			realTime.client.getMessage = function (login, message) {
 				message.DateTime = new Date(message.DateTime);
 				if (sessionInfo.friend != null) {
 					if (login == sessionInfo.friend.Login) {
@@ -106,7 +107,7 @@
 				}
 				page.dynamicMessage.Update(login, message);
 			};
-			real_time.client.isOnlineFriend = function (user) {
+			realTime.client.isOnlineFriend = function (user) {
 				if (sessionInfo.friend != null) {
 					if (user.Login == sessionInfo.friend.Login) {
 						user.LastSeen = new Date(user.LastSeen);
@@ -151,54 +152,41 @@
 			});
 
 			$.connection.hub.start().done(function () {
-				real_time.server.connect(api.Key);
+				realTime.server.connect(api.Key);
 				$("#MessageByUser").keyup(function (event) {
 					var mess = $("#MessageByUser").val().slice(0, -1);
 					var keyEnter = 13;
 					if (event.keyCode == keyEnter) {
-						if (!IsEmptyMessage(mess)) {
+						if (!mess.IsEmptyMessage()) {
 							var message = {
 								"Name": sessionInfo.user.FirstName + " " + sessionInfo.user.LastName,
 								"Text": mess,
 								"DateTime": new Date()
-								//"Avatar": sessionInfo.user.Avatar
 							};
 							$("#MessageByUser").val("");
 							page.dynamicMessage.Append(message);
 							SendMessage(sessionInfo.friend.Login, message, function () {
-								real_time.server.send(api.Key, sessionInfo.user.Login, sessionInfo.friend.Login, message);
+								realTime.server.send(api.Key, sessionInfo.user.Login, sessionInfo.friend.Login, message);
 							});
 						}
 					}
 				});
 				$("#SendMessage").click(function () {
 					var mess = $("#MessageByUser").val();
-					if (!IsEmptyMessage(mess)) {
+					if (!mess.IsEmptyMessage()) {
 						var message = {
 							"Name": sessionInfo.user.FirstName + " " + sessionInfo.user.LastName,
 							"Text": mess,
 							"DateTime": new Date()
-							//"Avatar": sessionInfo.user.Avatar
 						};
 						$("#MessageByUser").val("");
 						page.dynamicMessage.Append(message);
 						SendMessage(sessionInfo.friend.Login, message, function () {
-							real_time.server.send(api.Key, sessionInfo.user.Login, sessionInfo.friend.Login, message);
+							realTime.server.send(api.Key, sessionInfo.user.Login, sessionInfo.friend.Login, message);
 						});
 					}
 				});
 			});
-
-			function IsEmptyMessage(str) {
-				if (str == null || str.length == 0)
-					return true;
-				for (var i = 0; i < str.length; ++i) {
-					var symbol = str[i].charCodeAt(0);
-					if (!((symbol >= 0 && symbol <= 32) || symbol == 127))
-						return false;
-				}
-				return true;
-			};
 
 			function SendMessage(login, message, callback) {
 				var countMessages = $('.Message').length;
