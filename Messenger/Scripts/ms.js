@@ -180,11 +180,12 @@ var DynamicMessage = function () {
 			$("#ScrollMessages").animate({ scrollTop: 1000000 }, 500);
 		},
 		CountNotRead: DynamicCountNotRead(),
+		Count: function () { return $(".Messages").length; },
 		Update: function (login, message) {
 			if ($("tr[data-login='" + login + "']").length) {
 				$("tr[data-login='" + login + "']").find(".LastMessage")
 					.text(message.Text.length <= 40 ? message.Text : message.Text.substring(0, 39));
-				$("tr[data-login='" + login + "']").find(".Time").html("<time>" + message.DateTime.VisualTime() + "</time");
+				$("tr[data-login='" + login + "']").find("time").text(message.DateTime.VisualTime());
 				var friend = "<tr class='Friend' data-login='" + login + "'>" + $("tr[data-login='" + login + "']").html() + "</tr>";
 				$("tr[data-login='" + login + "']").remove();
 				$("#Friends").prepend(friend);
@@ -214,7 +215,7 @@ var DynamicMessage = function () {
 				makeMessages += "<span class='NameSender'>" + message.Name + "</span><br>";
 				makeMessages += "<span class='TextMessage'>" + message.Text + "</span>";
 				makeMessages += "</td>";
-				makeMessages += "<td class='TimeMessage'><time>" + dateTime.VisualDate() + " " + dateTime.VisualTime() + "</time></td>";
+				makeMessages += "<td class='TimeMessage'><time>" + dateTime.VisualUTCDate() + " " + dateTime.VisualUTCTime() + "</time></td>";
 				makeMessages += "</tr>";
 			});
 			$("#Messages").html("");

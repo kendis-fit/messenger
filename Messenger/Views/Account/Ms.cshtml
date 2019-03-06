@@ -132,7 +132,8 @@
 					"Name": $(this).find(".Name").text(),
 					"Avatar": $(this).find("img").attr("src")
 				};
-				if (page.dynamicMessage.CountNotRead.Exists(sessionInfo.friend.Login)) {
+				var existsNewMessages = page.dynamicMessage.CountNotRead.Exists(sessionInfo.friend.Login);
+				if (existsNewMessages) {
 					api.RemoveCountNotReadMessages(sessionInfo.friend.Login);
 					page.dynamicMessage.CountNotRead.Remove(sessionInfo.friend.Login);
 				}
@@ -144,54 +145,44 @@
 					page.dynamicFriend.Select(friend);
 				});
 			});
-
+			// real time methods
 			$.connection.hub.start().done(function () {
 				realTime.server.connect(api.Key);
 				$("#MessageByUser").keyup(function (event) {
-					var mess = $("#MessageByUser").val().slice(0, -1);
+					var message = $("#MessageByUser").val().slice(0, -1);
 					var keyEnter = 13;
 					if (event.keyCode == keyEnter) {
-						if (!mess.IsEmptyMessage()) {
-							var message = {
-								"Name": sessionInfo.user.FirstName + " " + sessionInfo.user.LastName,
-								"Text": mess,
-								"DateTime": new Date()
-							};
-							$("#MessageByUser").val("");
-							page.dynamicMessage.Append(message);
-							SendMessage(sessionInfo.friend.Login, message, function () {
-								realTime.server.send(api.Key, sessionInfo.user.Login, sessionInfo.friend.Login, message);
-							});
+						if (!message.IsEmptyMessage()) {
+							SendMessage(message);
 						}
 					}
 				});
 				$("#SendMessage").click(function () {
-					var mess = $("#MessageByUser").val();
-					if (!mess.IsEmptyMessage()) {
-						var message = {
-							"Name": sessionInfo.user.FirstName + " " + sessionInfo.user.LastName,
-							"Text": mess,
-							"DateTime": new Date()
-						};
-						$("#MessageByUser").val("");
-						page.dynamicMessage.Append(message);
-						SendMessage(sessionInfo.friend.Login, message, function () {
-							realTime.server.send(api.Key, sessionInfo.user.Login, sessionInfo.friend.Login, message);
-						});
+					var message = $("#MessageByUser").val();
+					if (!message.IsEmptyMessage()) {
+						SendMessage(message);
 					}
 				});
 			});
-
-			function SendMessage(login, message, callback) {
-				var countMessages = $('.Message').length;
-				if (countMessages == 1) {
-					api.CreateFriendship(login, message.Text, message.DateTime.toLocaleString(), callback);
-				}
-				else {
-					api.SendMessage(login, message.Text, message.DateTime.toLocaleString(), callback);
-				}
-				page.dynamicMessage.Update(login, message);
-			};
+			function SendMessage(textMessage) {
+				var callback = function () {
+					realTime.server.send(api.Key, sessionInfo.user.Login, sessionInfo.friend.Login, message);
+				};
+				var message = {
+					"Name": sessionInfo.user.FirstName + " " + sessionInfo.user.LastName,
+					"Text": textMessage,
+					"DateTime": new Date()
+				};
+				$("#MessageByUser").val(""); // clear sent
+				page.dynamicMessage.Append(message);
+				if (page.dynamicMessage.Count() == 1) // create correspondence in db
+					api.CreateFriendship
+						(sessionInfo.friend.Login, message.Text, message.DateTime.toLocaleString(), callback);
+				else
+					api.SendMessage
+						(sessionInfo.friend.Login, message.Text, message.DateTime.toLocaleString(), callback);
+				page.dynamicMessage.Update(sessionInfo.friend.Login, message);
+			}
 		});
 	</script>
 }
